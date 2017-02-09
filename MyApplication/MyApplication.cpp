@@ -42,7 +42,7 @@ bool MyApplication::startup()
 							uniform mat4 projectionViewWorldMatrix; \
 							uniform float time; \
 							uniform float heightScale; \
-							void main() { vColour = colour; vec4 p = position; p.y += sin(time + position.x) * heightScale; gl_Position = projectionViewWorldMatrix * p; }";
+							void main() { vColour = colour; vec4 p = position; p.y += sin(time + (position.x + position.z) / 2) * heightScale; gl_Position = projectionViewWorldMatrix * p; }";
 
 	const char* fsSource = "#version 410\n \
 							in vec4 vColour; \

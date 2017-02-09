@@ -31,8 +31,8 @@ protected:
 
 	Camera camera;
 
-	unsigned int rows = 8;
-	unsigned int cols = 8;
+	unsigned int rows = 20;
+	unsigned int cols = 20;
 
 	//Vertex and index buffers
 	unsigned int m_VAO;
