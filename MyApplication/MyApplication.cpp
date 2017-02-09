@@ -4,6 +4,7 @@
 #include <glm\glm.hpp>
 #include <glm\ext.hpp>
 #include <gl_core_4_4.h>
+#include <iostream>
 
 using glm::vec3;
 using glm::vec4;
@@ -39,7 +40,9 @@ bool MyApplication::startup()
 							layout(location=1) in vec4 colour; \
 							out vec4 vColour; \
 							uniform mat4 projectionViewWorldMatrix; \
-							void main() { vColour = colour; gl_Position = projectionViewWorldMatrix * position; }";
+							uniform float time; \
+							uniform float heightScale; \
+							void main() { vColour = colour; vec4 p = position; p.y += sin(time + position.x) * heightScale; gl_Position = projectionViewWorldMatrix * p; }";
 
 	const char* fsSource = "#version 410\n \
 							in vec4 vColour; \
@@ -103,6 +106,8 @@ void MyApplication::shutdown()
 
 void MyApplication::update(float deltaTime)
 {
+	m_time += deltaTime;
+
 	//Update camera
 	camera.Update(deltaTime);
 
@@ -140,7 +145,13 @@ void MyApplication::draw()
 	//Pass MVP matrix into shader program
 	unsigned int projectionViewUniform = glGetUniformLocation(m_programID, "projectionViewWorldMatrix");
 	glUniformMatrix4fv(projectionViewUniform, 1, false, glm::value_ptr(m_projectionMatrix * m_viewMatrix));
-	
+
+	//Pass in time and heightscale for animation
+	unsigned int timeUniform = glGetUniformLocation(m_programID, "time");
+	glUniform1f(timeUniform, m_time);
+	unsigned int heightScaleUniform = glGetUniformLocation(m_programID, "heightScale");
+	glUniform1f(heightScaleUniform, m_heightScale);
+
 	//Bind VertexArrayObject
 	glBindVertexArray(m_VAO);
 	unsigned int indexCount = (rows - 1) * (cols - 1) * 6;

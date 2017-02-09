@@ -40,5 +40,8 @@ protected:
 	unsigned int m_IBO;
 
 	unsigned int m_programID;
+
+	float m_time = 0;
+	float m_heightScale = 1.0f;
 };
 
