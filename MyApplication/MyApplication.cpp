@@ -42,12 +42,17 @@ void MyApplication::shutdown()
 
 void MyApplication::update(float deltaTime)
 {
+	//Update camera
+	camera.Update(deltaTime);
+
+	//Gizmos
 	Gizmos::clear();
 
 	//Draw a simple grid with gizmos
 	vec4 white(1);
 	vec4 black(0, 0, 0, 1);
-	for (int i = 0; i < 21; ++i) {
+	for (int i = 0; i < 21; ++i)
+	{
 		Gizmos::addLine(vec3(-10 + i, 0, 10),
 			vec3(-10 + i, 0, -10),
 			i == 10 ? white : black);
@@ -55,6 +60,9 @@ void MyApplication::update(float deltaTime)
 			vec3(-10, 0, -10 + i),
 			i == 10 ? white : black);
 	}
+
+	//Draw a sun at origin
+	Gizmos::addSphere(vec3(0), 1, 16, 10, vec4(1, 1, 0, 1));
 }
 
 void MyApplication::draw()
@@ -63,9 +71,8 @@ void MyApplication::draw()
 	clearScreen();
 
 	//Update perspective in case window resized
-	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f,
-		getWindowWidth() / (float)getWindowHeight(),
-		0.1f, 1000.f);
+	m_projectionMatrix = camera.GetProjectionMatrix(getWindowWidth(), getWindowHeight());
+	m_viewMatrix = camera.GetViewMatrix();
 
 	//Draw gizmos with virtual camera
 	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
