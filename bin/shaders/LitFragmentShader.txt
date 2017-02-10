@@ -1,6 +1,7 @@
 #version 410
 in vec4 worldNormal;
 in vec4 worldPosition;
+in vec2 uv;
 out vec4 fragColor;
 
 uniform vec4 cameraPosition;
@@ -22,9 +23,10 @@ void main()
 	specular = specular * specular;
 
 	//Diffuse colour
-	vec2 uv = worldPosition.xy;
-	vec4 col = texture(diffuse, uv);
+	//vec2 uv = worldPosition.xy;
+	//Col is flipped texture
+	vec4 col = texture(diffuse, vec2(uv.s, 1-uv.t));
 
 	//Final colour
-    fragColor = col * intensity + vec4(specular, specular, specular, 1) + 0.2;
+    fragColor = col * (intensity + vec4(specular, specular, specular, 1) + 0.2);
 }

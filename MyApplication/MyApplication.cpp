@@ -51,7 +51,7 @@ MyApplication::~MyApplication()
 bool MyApplication::startup()
 {
 	//Set the background colour
-	setBackgroundColour(0.5f, 0.5f, 0.5f);
+	setBackgroundColour(0.25f, 0.25f, 0.25f);
 
 	//Initialise gizmo primitive counts
 	Gizmos::create(10000, 10000, 10000, 10000);
@@ -71,11 +71,11 @@ bool MyApplication::startup()
 	m_programID = Shader::CompileShaders(vsFile, fsFile);
 	
 	//Load model from file
-	LoadObjModel("models/Dragon.obj");
+	LoadObjModel("models/Computer_Laptop.obj");
 	createOpenGLBuffers(attrib, shapes);
 
 	//Load texture from file
-	texture.load("textures/barrelBeige.png");
+	texture.load("textures/Computer_Laptop_D.tga");
 
 	return true;
 }
@@ -97,7 +97,7 @@ void MyApplication::update(float deltaTime)
 
 	//Draw a simple grid with gizmos
 	vec4 white(1);
-	vec4 black(0, 0, 0, 1);
+	vec4 black(0.1f, 0.1f, 0.1f, 1);
 	for (int i = 0; i < 21; ++i)
 	{
 		Gizmos::addLine(vec3(-10 + i, 0, 10),
