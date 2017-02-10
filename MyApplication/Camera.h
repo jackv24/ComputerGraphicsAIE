@@ -14,6 +14,8 @@ public:
 	glm::mat4 GetProjectionMatrix(float w, float h);
 	glm::mat4 GetViewMatrix();
 
+	glm::vec3 GetPos();
+
 private:
 	float theta;
 	float phi;

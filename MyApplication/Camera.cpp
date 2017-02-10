@@ -78,3 +78,8 @@ glm::mat4 Camera::GetViewMatrix()
 	//Return view matrix
 	return glm::lookAt(position, position + forward, glm::vec3(0, 1, 0));
 }
+
+glm::vec3 Camera::GetPos()
+{
+	return position;
+}

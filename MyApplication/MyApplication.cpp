@@ -62,13 +62,13 @@ bool MyApplication::startup()
 		0.1f, 1000.0f);
 
 	//File path to load shaders from
-	const char* vsFile = "shaders/DiffuseVertexShader.txt";
-	const char* fsFile = "shaders/DiffuseFragmentShader.txt";
+	const char* vsFile = "shaders/LitVertexShader.txt";
+	const char* fsFile = "shaders/LitFragmentShader.txt";
 
 	//Load and compile shaders from file
 	m_programID = Shader::CompileShaders(vsFile, fsFile);
 	
-	LoadObjModel("models/Bunny.obj");
+	LoadObjModel("models/Lucy.obj");
 	createOpenGLBuffers(attrib, shapes);
 
 	return true;
@@ -136,6 +136,8 @@ void MyApplication::draw()
 	glUniform1f(timeUniform, m_time);
 	unsigned int heightScaleUniform = glGetUniformLocation(m_programID, "heightScale");
 	glUniform1f(heightScaleUniform, m_heightScale);
+	unsigned int camUniform = glGetUniformLocation(m_programID, "cameraPosition");
+	glUniform4f(camUniform, camera.GetPos().x, camera.GetPos().y, camera.GetPos().z, 1);
 
 	//Bind VertexArrayObjects and draw
 	for (auto& gl : m_glInfo)
