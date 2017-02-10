@@ -1,0 +1,12 @@
+#version 410
+in vec4 worldNormal;
+out vec4 fragColor;
+
+void main() 
+{ 
+	vec4 light = vec4(0.5, 0.7, 0.5, 0);
+
+	float intensity = clamp(dot(light, worldNormal), 0, 1);
+
+    fragColor = vec4(intensity, intensity, intensity, 1); 
+}

@@ -1,0 +1,13 @@
+#version 410
+layout(location=0) in vec4 position;
+layout(location=1) in vec4 normal;
+out vec4 worldNormal;
+
+uniform mat4 MVP;
+uniform mat4 M;
+
+void main() 
+{ 
+    worldNormal = M * vec4(normal.xyz, 0); 
+    gl_Position = MVP * position;
+}

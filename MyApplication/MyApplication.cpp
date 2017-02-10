@@ -62,8 +62,8 @@ bool MyApplication::startup()
 		0.1f, 1000.0f);
 
 	//File path to load shaders from
-	const char* vsFile = "shaders/WaveVertexShader.txt";
-	const char* fsFile = "shaders/WaveFragmentShader.txt";
+	const char* vsFile = "shaders/DiffuseVertexShader.txt";
+	const char* fsFile = "shaders/DiffuseFragmentShader.txt";
 
 	//Load and compile shaders from file
 	m_programID = Shader::CompileShaders(vsFile, fsFile);
@@ -112,14 +112,24 @@ void MyApplication::draw()
 	m_projectionMatrix = camera.GetProjectionMatrix((float)getWindowWidth(), (float)getWindowHeight());
 	m_viewMatrix = camera.GetViewMatrix();
 
+	//Rotate model slowly
+	static float angle = 0;
+	angle += 0.01f;
+	mat4 modelMatrix = glm::rotate(angle, vec3(0, 1, 0));
+	glm::mat4 mvp = m_projectionMatrix * m_viewMatrix * modelMatrix;
+
 	//Draw gizmos with virtual camera
 	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
 
 	//Bind shader program, insturcting OpenGL which shaders to use
 	glUseProgram(m_programID);
+
 	//Pass MVP matrix into shader program
-	unsigned int projectionViewUniform = glGetUniformLocation(m_programID, "projectionViewWorldMatrix");
-	glUniformMatrix4fv(projectionViewUniform, 1, false, glm::value_ptr(m_projectionMatrix * m_viewMatrix));
+	unsigned int projectionViewUniform = glGetUniformLocation(m_programID, "MVP");
+	glUniformMatrix4fv(projectionViewUniform, 1, false, glm::value_ptr(mvp));
+	//Pass model M matrix into shader program seperately
+	unsigned int modelUniform = glGetUniformLocation(m_programID, "M");
+	glUniformMatrix4fv(modelUniform, 1, GL_FALSE, (float*)&modelMatrix);
 
 	//Pass in time and heightscale for animation
 	unsigned int timeUniform = glGetUniformLocation(m_programID, "time");
