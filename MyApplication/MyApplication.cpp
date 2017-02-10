@@ -5,11 +5,38 @@
 #include <glm\ext.hpp>
 #include <gl_core_4_4.h>
 #include <iostream>
+#include "Shader.h"
 
 using glm::vec3;
 using glm::vec4;
 using glm::mat4;
 using aie::Gizmos;
+
+tinyobj::attrib_t attrib;
+std::vector<tinyobj::shape_t> shapes;
+std::vector<tinyobj::material_t> materials;
+
+struct Vertex
+{
+	glm::vec4 position;
+	glm::vec4 colour;
+};
+
+struct GLInfo
+{
+	unsigned int m_VAO;
+	unsigned int m_VBO;
+	unsigned int m_faceCount;
+};
+
+struct OBJVertex
+{
+	float x, y, z;
+	float nx, ny, nz;
+	float u, v;
+};
+
+std::vector<GLInfo> m_glInfo;
 
 MyApplication::MyApplication()
 {
@@ -34,67 +61,15 @@ bool MyApplication::startup()
 		getWindowWidth() / (float)getWindowHeight(),
 		0.1f, 1000.0f);
 
-	//Create shaders
-	const char* vsSource = "#version 410\n \
-							layout(location=0) in vec4 position; \
-							layout(location=1) in vec4 colour; \
-							out vec4 vColour; \
-							uniform mat4 projectionViewWorldMatrix; \
-							uniform float time; \
-							uniform float heightScale; \
-							void main() { vColour = colour; vec4 p = position; p.y += sin(time + (position.x + position.z) / 2) * heightScale; gl_Position = projectionViewWorldMatrix * p; }";
+	//File path to load shaders from
+	const char* vsFile = "shaders/WaveVertexShader.txt";
+	const char* fsFile = "shaders/WaveFragmentShader.txt";
 
-	const char* fsSource = "#version 410\n \
-							in vec4 vColour; \
-							out vec4 fragColor; \
-							void main() { fragColor = vColour; }";
-
-	//Stores whether shader compilation succeeded or not
-	int success = GL_FALSE;
-
-	//Create shaders
-	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-	//Compile shaders
-	//Load shader source from string (char array)
-	glShaderSource(vertexShader, 1, (const char**)&vsSource, 0);
-	glCompileShader(vertexShader); 	//Compile
-	//Load shader source from string (char array)
-	glShaderSource(fragmentShader, 1, (const char**)&fsSource, 0);
-	glCompileShader(fragmentShader); //Compile
-
-	//Link compiled shaders into shader program
-	m_programID = glCreateProgram();
-	glAttachShader(m_programID, vertexShader);
-	glAttachShader(m_programID, fragmentShader);
-	glLinkProgram(m_programID);
-
-	//Get linking status (if it succeeded or not)
-	glGetProgramiv(m_programID, GL_LINK_STATUS, &success);
-
-	//If shader linking failed...
-	if (success == GL_FALSE)
-	{
-		//Get log length and create char array to fit
-		int infoLogLength = 0;
-		glGetProgramiv(m_programID, GL_INFO_LOG_LENGTH, &infoLogLength);
-		char* infoLog = new char[infoLogLength];
-
-		//Store log into char array
-		glGetProgramInfoLog(m_programID, infoLogLength, 0, infoLog);
-		printf("Error: Failed to link shader program!\n");
-		//Print log
-		printf("%s\n", infoLog);
-		
-		delete[] infoLog;
-	}
-
-	//Delete individual shaders as they have been linked together
-	glDeleteShader(fragmentShader);
-	glDeleteShader(vertexShader);
-
-	generateGrid();
+	//Load and compile shaders from file
+	m_programID = Shader::CompileShaders(vsFile, fsFile);
+	
+	LoadObjModel("models/Bunny.obj");
+	createOpenGLBuffers(attrib, shapes);
 
 	return true;
 }
@@ -134,7 +109,7 @@ void MyApplication::draw()
 	clearScreen();
 
 	//Update perspective in case window resized
-	m_projectionMatrix = camera.GetProjectionMatrix(getWindowWidth(), getWindowHeight());
+	m_projectionMatrix = camera.GetProjectionMatrix((float)getWindowWidth(), (float)getWindowHeight());
 	m_viewMatrix = camera.GetViewMatrix();
 
 	//Draw gizmos with virtual camera
@@ -152,88 +127,84 @@ void MyApplication::draw()
 	unsigned int heightScaleUniform = glGetUniformLocation(m_programID, "heightScale");
 	glUniform1f(heightScaleUniform, m_heightScale);
 
-	//Bind VertexArrayObject
-	glBindVertexArray(m_VAO);
-	unsigned int indexCount = (rows - 1) * (cols - 1) * 6;
-
-	//Draw triangles
-	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+	//Bind VertexArrayObjects and draw
+	for (auto& gl : m_glInfo)
+	{
+		glBindVertexArray(gl.m_VAO);
+		glDrawArrays(GL_TRIANGLES, 0, gl.m_faceCount * 3);
+	}
 }
 
-void MyApplication::generateGrid()
+void MyApplication::createOpenGLBuffers(tinyobj::attrib_t& attribs, std::vector<tinyobj::shape_t>& shapes)
 {
-	//Create matrix of vertices
-	Vertex* aoVertices = new Vertex[rows * cols];
+	m_glInfo.resize(shapes.size());
 
-	//Generate vertices
-	for (unsigned int r = 0; r < rows; ++r)
+	int shapeIndex = 0;
+
+	for (auto& shape : shapes)
 	{
-		for (unsigned int c = 0; c < cols; ++c)
+		//Setup OpenGL data
+		glGenVertexArrays(1, &m_glInfo[shapeIndex].m_VAO);
+		glGenBuffers(1, &m_glInfo[shapeIndex].m_VBO);
+		glBindVertexArray(m_glInfo[shapeIndex].m_VAO);
+		m_glInfo[shapeIndex].m_faceCount = shape.mesh.num_face_vertices.size();
+
+		//Collect triangle vertices
+		std::vector<OBJVertex> vertices;
+
+		int index = 0;
+		for (auto face : shape.mesh.num_face_vertices)
 		{
-			//Convert 2D index to 1D
-			int index = r * cols + c;
+			for (int i = 0; i < 3; ++i)
+			{
+				tinyobj::index_t idx = shape.mesh.indices[index + i];
 
-			//Set vertex position in grid
-			aoVertices[index].position = vec4((float)c, 0, (float)r, 1);
+				OBJVertex v = { 0 };
 
-			//Create an arbitrary colour
-			vec3 colour = vec3(sinf((c / (float)(cols - 1)) * (r / (float)(rows - 1))));
-			aoVertices[index].colour = vec4(colour, 1);
+				//Positions
+				v.x = attribs.vertices[3 * idx.vertex_index + 0];
+				v.y = attribs.vertices[3 * idx.vertex_index + 1];
+				v.z = attribs.vertices[3 * idx.vertex_index + 2];
+
+				//Normals
+				if (attribs.normals.size() > 0)
+				{
+					v.nx = attribs.normals[3 * idx.normal_index + 0];
+					v.ny = attribs.normals[3 * idx.normal_index + 1];
+					v.nz = attribs.normals[3 * idx.normal_index + 2];
+				}
+
+				//Texture coordinates
+				if (attrib.texcoords.size() > 0)
+				{
+					v.u = attribs.texcoords[2 * idx.texcoord_index + 0];
+					v.v = attribs.texcoords[2 * idx.texcoord_index + 1];
+				}
+
+				vertices.push_back(v);
+			}
+
+			index += face;
 		}
+
+		//Bind vertex data
+		glBindBuffer(GL_ARRAY_BUFFER, m_glInfo[shapeIndex].m_VBO);
+		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(OBJVertex), vertices.data(), GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0); //Position
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(OBJVertex), 0);
+		glEnableVertexAttribArray(1); //Normal data
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, sizeof(OBJVertex), (void*)12);
+		glEnableVertexAttribArray(2); //Normal data
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(OBJVertex), (void*)24);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		shapeIndex++;
 	}
+}
 
-	//Generate indices
-	//Define index count based off quad count (2 triangles per quad)
-	unsigned int* auiIndices = new unsigned int[(rows - 1) * (cols - 1) * 6];
-
-	unsigned int index = 0;
-	
-	for (unsigned int r = 0; r < (rows - 1); ++r)
-	{
-		for (unsigned int c = 0; c < (cols - 1); ++c)
-		{
-			//Triangle 1
-			auiIndices[index++] = r * cols + c;
-			auiIndices[index++] = (r + 1) * cols + c;
-			auiIndices[index++] = (r + 1) * cols + (c + 1);
-
-			//Triangle 2
-			auiIndices[index++] = r * cols + c;
-			auiIndices[index++] = (r + 1) * cols + (c + 1);
-			auiIndices[index++] = r * cols + (c + 1);
-		}
-	}
-
-	//Generate GL buffers
-	glGenBuffers(1, &m_VBO);
-	glGenBuffers(1, &m_IBO);
-
-	//Generate VertexArrayObject
-	glGenVertexArrays(1, &m_VAO);
-	glBindVertexArray(m_VAO);
-
-	//Create and bind buffers to a vertex array object
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, (rows * cols) * sizeof(Vertex), aoVertices, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(vec4)));
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	//Generated and fill index buffer
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (rows - 1) * (cols - 1) * 6 * sizeof(unsigned int), auiIndices, GL_STATIC_DRAW);
-
-	//Bind vertex array to 0 - clear it
-	glBindVertexArray(0);
-	//After, unbind array buffer and element array buffer
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	//TODO: add more and stuff
-	delete[] aoVertices;
-	delete[] auiIndices;
+void MyApplication::LoadObjModel(const char* name)
+{
+	std::string err;
+	tinyobj::LoadObj(&attrib, &shapes, &materials, &err, name);
 }

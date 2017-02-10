@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Application.h"
-#include <glm/mat4x4.hpp>
-#include <glm/vec4.hpp>
 #include "Camera.h"
+#include <vector>
+#include <string>
+#include "tiny_obj_loader.h"
 
 class MyApplication : public aie::Application
 {
@@ -18,14 +19,10 @@ public:
 	virtual void draw();
 
 	void generateGrid();
+	void LoadObjModel(const char* name);
+	void createOpenGLBuffers(tinyobj::attrib_t& attribs, std::vector<tinyobj::shape_t>& shapes);
 
 protected:
-	struct Vertex
-	{
-		glm::vec4 position;
-		glm::vec4 colour;
-	};
-
 	glm::mat4 m_viewMatrix;
 	glm::mat4 m_projectionMatrix;
 
@@ -33,11 +30,6 @@ protected:
 
 	unsigned int rows = 20;
 	unsigned int cols = 20;
-
-	//Vertex and index buffers
-	unsigned int m_VAO;
-	unsigned int m_VBO;
-	unsigned int m_IBO;
 
 	unsigned int m_programID;
 

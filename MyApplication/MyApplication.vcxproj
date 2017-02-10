@@ -157,14 +157,18 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="MyApplication.h" />
+    <ClInclude Include="Shader.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="tiny_obj_loader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MyApplication.cpp" />
+    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="tiny_obj_loader.cc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
