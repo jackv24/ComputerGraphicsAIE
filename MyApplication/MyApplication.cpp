@@ -6,6 +6,7 @@
 #include <gl_core_4_4.h>
 #include <iostream>
 #include "Shader.h"
+#include <Texture.h>
 
 using glm::vec3;
 using glm::vec4;
@@ -37,6 +38,7 @@ struct OBJVertex
 };
 
 std::vector<GLInfo> m_glInfo;
+aie::Texture texture;
 
 MyApplication::MyApplication()
 {
@@ -68,8 +70,12 @@ bool MyApplication::startup()
 	//Load and compile shaders from file
 	m_programID = Shader::CompileShaders(vsFile, fsFile);
 	
-	LoadObjModel("models/Lucy.obj");
+	//Load model from file
+	LoadObjModel("models/Dragon.obj");
 	createOpenGLBuffers(attrib, shapes);
+
+	//Load texture from file
+	texture.load("textures/barrelBeige.png");
 
 	return true;
 }
@@ -136,8 +142,18 @@ void MyApplication::draw()
 	glUniform1f(timeUniform, m_time);
 	unsigned int heightScaleUniform = glGetUniformLocation(m_programID, "heightScale");
 	glUniform1f(heightScaleUniform, m_heightScale);
+	//Pass in camera position
 	unsigned int camUniform = glGetUniformLocation(m_programID, "cameraPosition");
 	glUniform4f(camUniform, camera.GetPos().x, camera.GetPos().y, camera.GetPos().z, 1);
+
+	//Texturing
+	//Set texture slot
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture.getHandle());
+	//Tell shader where it is
+	int loc = glGetUniformLocation(m_programID, "diffuse");
+	glUniform1i(loc, 0);
+
 
 	//Bind VertexArrayObjects and draw
 	for (auto& gl : m_glInfo)
@@ -206,7 +222,7 @@ void MyApplication::createOpenGLBuffers(tinyobj::attrib_t& attribs, std::vector<
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(OBJVertex), 0);
 		glEnableVertexAttribArray(1); //Normal data
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, sizeof(OBJVertex), (void*)12);
-		glEnableVertexAttribArray(2); //Normal data
+		glEnableVertexAttribArray(2); //Tex coords
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(OBJVertex), (void*)24);
 
 		glBindVertexArray(0);

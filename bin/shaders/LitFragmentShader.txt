@@ -4,6 +4,7 @@ in vec4 worldPosition;
 out vec4 fragColor;
 
 uniform vec4 cameraPosition;
+uniform sampler2D diffuse;
 
 void main() 
 { 
@@ -20,6 +21,10 @@ void main()
 	//Raised to the power of two - controls highlight tightness
 	specular = specular * specular;
 
+	//Diffuse colour
+	vec2 uv = worldPosition.xy;
+	vec4 col = texture(diffuse, uv);
+
 	//Final colour
-    fragColor = vec4(intensity+specular, intensity+specular, intensity+specular, 1); 
+    fragColor = col * intensity + vec4(specular, specular, specular, 1) + 0.2;
 }
