@@ -119,8 +119,8 @@ void MyApplication::draw()
 	m_viewMatrix = camera.GetViewMatrix();
 
 	//Rotate model slowly
-	static float angle = 0;
-	angle += 0.01f;
+	float angle = 0;
+	angle += 1.0f * m_time;
 	mat4 modelMatrix = glm::rotate(angle, vec3(0, 1, 0));
 	glm::mat4 mvp = m_projectionMatrix * m_viewMatrix * modelMatrix;
 

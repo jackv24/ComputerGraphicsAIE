@@ -54,6 +54,12 @@ void Camera::Update(float deltaTime)
 	{
 		theta += 0.05f * (mx - lastMouseX) * cameraSpeed;
 		phi += 0.05f * (my - lastMouseY) * cameraSpeed;
+
+		//Clamp pitch the prevent camera turning upside-down
+		if (phi < -pitchLimit)
+			phi = -pitchLimit;
+		else if (phi >= pitchLimit)
+			phi = pitchLimit;
 	}
 
 	//Store this frame's mouse pos for next frame

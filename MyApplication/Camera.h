@@ -20,6 +20,8 @@ private:
 	float theta;
 	float phi;
 
+	float pitchLimit = 80.0f;
+
 	glm::vec3 position;
 };
 
