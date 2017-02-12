@@ -172,6 +172,14 @@
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="tiny_obj_loader.cc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\shaders\BasicShader.frag" />
+    <None Include="..\bin\shaders\BasicShader.vert" />
+    <None Include="..\bin\shaders\LitShader.frag" />
+    <None Include="..\bin\shaders\LitShader.vert" />
+    <None Include="..\bin\shaders\WaveShader.frag" />
+    <None Include="..\bin\shaders\WaveShader.vert" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

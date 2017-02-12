@@ -63,4 +63,24 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\shaders\BasicShader.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\bin\shaders\BasicShader.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\bin\shaders\LitShader.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\bin\shaders\LitShader.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\bin\shaders\WaveShader.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\bin\shaders\WaveShader.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

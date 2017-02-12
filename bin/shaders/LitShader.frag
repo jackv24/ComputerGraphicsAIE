@@ -1,3 +1,4 @@
+// shadertype=glsl
 #version 410
 in vec4 worldNormal;
 in vec4 worldPosition;

@@ -46,8 +46,8 @@ bool MyApplication::startup()
 		0.1f, 1000.0f);
 
 	//File path to load shaders from
-	const char* vsFile = "shaders/LitVertexShader.txt";
-	const char* fsFile = "shaders/LitFragmentShader.txt";
+	const char* vsFile = "shaders/LitShader.vert";
+	const char* fsFile = "shaders/LitShader.frag";
 
 	//Load and compile shaders from file
 	m_programID = Shader::CompileShaders(vsFile, fsFile);
