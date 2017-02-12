@@ -18,10 +18,6 @@ public:
 	virtual void update(float deltaTime);
 	virtual void draw();
 
-	void generateGrid();
-	void LoadObjModel(const char* name);
-	void createOpenGLBuffers(tinyobj::attrib_t& attribs, std::vector<tinyobj::shape_t>& shapes);
-
 protected:
 	glm::mat4 m_viewMatrix;
 	glm::mat4 m_projectionMatrix;

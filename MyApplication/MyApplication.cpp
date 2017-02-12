@@ -6,16 +6,12 @@
 #include <gl_core_4_4.h>
 #include <iostream>
 #include "Shader.h"
-#include <Texture.h>
+#include "Model.h"
 
 using glm::vec3;
 using glm::vec4;
 using glm::mat4;
 using aie::Gizmos;
-
-tinyobj::attrib_t attrib;
-std::vector<tinyobj::shape_t> shapes;
-std::vector<tinyobj::material_t> materials;
 
 struct Vertex
 {
@@ -23,22 +19,8 @@ struct Vertex
 	glm::vec4 colour;
 };
 
-struct GLInfo
-{
-	unsigned int m_VAO;
-	unsigned int m_VBO;
-	unsigned int m_faceCount;
-};
-
-struct OBJVertex
-{
-	float x, y, z;
-	float nx, ny, nz;
-	float u, v;
-};
-
-std::vector<GLInfo> m_glInfo;
-aie::Texture texture;
+Model model1;
+Model model2;
 
 MyApplication::MyApplication()
 {
@@ -70,12 +52,14 @@ bool MyApplication::startup()
 	//Load and compile shaders from file
 	m_programID = Shader::CompileShaders(vsFile, fsFile);
 	
-	//Load model from file
-	LoadObjModel("models/Computer_Laptop.obj");
-	createOpenGLBuffers(attrib, shapes);
+	//Load models from file
+	model1.Load("models/Computer_Laptop.obj");
+	model1.CreateBuffers();
+	model1.LoadTexture("textures/Computer_Laptop_D.tga");
 
-	//Load texture from file
-	texture.load("textures/Computer_Laptop_D.tga");
+	model2.Load("models/sphere.obj");
+	model2.CreateBuffers();
+	model2.LoadTexture("textures/earth_diffuse.jpg");
 
 	return true;
 }
@@ -118,24 +102,13 @@ void MyApplication::draw()
 	m_projectionMatrix = camera.GetProjectionMatrix((float)getWindowWidth(), (float)getWindowHeight());
 	m_viewMatrix = camera.GetViewMatrix();
 
-	//Rotate model slowly
-	float angle = 0;
-	angle += 1.0f * m_time;
-	mat4 modelMatrix = glm::rotate(angle, vec3(0, 1, 0));
-	glm::mat4 mvp = m_projectionMatrix * m_viewMatrix * modelMatrix;
+	glm::mat4 cameraMatrix = m_projectionMatrix * m_viewMatrix;
 
 	//Draw gizmos with virtual camera
 	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
 
 	//Bind shader program, insturcting OpenGL which shaders to use
 	glUseProgram(m_programID);
-
-	//Pass MVP matrix into shader program
-	unsigned int projectionViewUniform = glGetUniformLocation(m_programID, "MVP");
-	glUniformMatrix4fv(projectionViewUniform, 1, false, glm::value_ptr(mvp));
-	//Pass model M matrix into shader program seperately
-	unsigned int modelUniform = glGetUniformLocation(m_programID, "M");
-	glUniformMatrix4fv(modelUniform, 1, GL_FALSE, (float*)&modelMatrix);
 
 	//Pass in time and heightscale for animation
 	unsigned int timeUniform = glGetUniformLocation(m_programID, "time");
@@ -146,93 +119,15 @@ void MyApplication::draw()
 	unsigned int camUniform = glGetUniformLocation(m_programID, "cameraPosition");
 	glUniform4f(camUniform, camera.GetPos().x, camera.GetPos().y, camera.GetPos().z, 1);
 
-	//Texturing
-	//Set texture slot
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture.getHandle());
-	//Tell shader where it is
-	int loc = glGetUniformLocation(m_programID, "diffuse");
-	glUniform1i(loc, 0);
-
-
-	//Bind VertexArrayObjects and draw
-	for (auto& gl : m_glInfo)
+	//Draw a bunch of one model
+	for (int i = 0; i < 10; i++)
 	{
-		glBindVertexArray(gl.m_VAO);
-		glDrawArrays(GL_TRIANGLES, 0, gl.m_faceCount * 3);
-	}
-}
-
-void MyApplication::createOpenGLBuffers(tinyobj::attrib_t& attribs, std::vector<tinyobj::shape_t>& shapes)
-{
-	m_glInfo.resize(shapes.size());
-
-	int shapeIndex = 0;
-
-	for (auto& shape : shapes)
-	{
-		//Setup OpenGL data
-		glGenVertexArrays(1, &m_glInfo[shapeIndex].m_VAO);
-		glGenBuffers(1, &m_glInfo[shapeIndex].m_VBO);
-		glBindVertexArray(m_glInfo[shapeIndex].m_VAO);
-		m_glInfo[shapeIndex].m_faceCount = shape.mesh.num_face_vertices.size();
-
-		//Collect triangle vertices
-		std::vector<OBJVertex> vertices;
-
-		int index = 0;
-		for (auto face : shape.mesh.num_face_vertices)
+		for (int j = 0; j < 10; j++)
 		{
-			for (int i = 0; i < 3; ++i)
-			{
-				tinyobj::index_t idx = shape.mesh.indices[index + i];
-
-				OBJVertex v = { 0 };
-
-				//Positions
-				v.x = attribs.vertices[3 * idx.vertex_index + 0];
-				v.y = attribs.vertices[3 * idx.vertex_index + 1];
-				v.z = attribs.vertices[3 * idx.vertex_index + 2];
-
-				//Normals
-				if (attribs.normals.size() > 0)
-				{
-					v.nx = attribs.normals[3 * idx.normal_index + 0];
-					v.ny = attribs.normals[3 * idx.normal_index + 1];
-					v.nz = attribs.normals[3 * idx.normal_index + 2];
-				}
-
-				//Texture coordinates
-				if (attrib.texcoords.size() > 0)
-				{
-					v.u = attribs.texcoords[2 * idx.texcoord_index + 0];
-					v.v = attribs.texcoords[2 * idx.texcoord_index + 1];
-				}
-
-				vertices.push_back(v);
-			}
-
-			index += face;
+			model1.Draw(glm::translate(vec3(i * 2, 0, j * 2)), cameraMatrix, m_programID);
 		}
-
-		//Bind vertex data
-		glBindBuffer(GL_ARRAY_BUFFER, m_glInfo[shapeIndex].m_VBO);
-		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(OBJVertex), vertices.data(), GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0); //Position
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(OBJVertex), 0);
-		glEnableVertexAttribArray(1); //Normal data
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, sizeof(OBJVertex), (void*)12);
-		glEnableVertexAttribArray(2); //Tex coords
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(OBJVertex), (void*)24);
-
-		glBindVertexArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		shapeIndex++;
 	}
-}
 
-void MyApplication::LoadObjModel(const char* name)
-{
-	std::string err;
-	tinyobj::LoadObj(&attrib, &shapes, &materials, &err, name);
+	//Draw one of other model
+	model2.Draw(glm::translate(vec3(0, 2, 0)), cameraMatrix, m_programID);
 }
