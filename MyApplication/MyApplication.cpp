@@ -21,6 +21,7 @@ struct Vertex
 
 Model model1;
 Model model2;
+Model model3;
 
 MyApplication::MyApplication()
 {
@@ -60,6 +61,10 @@ bool MyApplication::startup()
 	model2.Load("models/sphere.obj");
 	model2.CreateBuffers();
 	model2.LoadTexture("textures/earth_diffuse.jpg");
+
+	model3.Load("models/Dragon.obj");
+	model3.CreateBuffers();
+	model3.LoadTexture("textures/earth_cloud.jpg");
 
 	return true;
 }
@@ -130,4 +135,6 @@ void MyApplication::draw()
 
 	//Draw one of other model
 	model2.Draw(glm::translate(vec3(0, 2, 0)), cameraMatrix, m_programID);
+
+	model3.Draw(glm::translate(vec3(0, 0, -5)), cameraMatrix, m_programID);
 }

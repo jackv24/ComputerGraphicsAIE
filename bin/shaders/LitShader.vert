@@ -12,9 +12,9 @@ uniform mat4 M;
 void main() 
 { 
     worldNormal = M * vec4(normal.xyz, 0); 
-	worldPosition = MVP * position;
+	worldPosition = M * position;
 
-	gl_Position = worldPosition;
+	gl_Position = MVP * position;
 
 	uv = uvs;
 }

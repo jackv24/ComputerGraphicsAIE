@@ -21,7 +21,7 @@ void main()
 	vec4 refl = reflect(toCamera, worldNormal);
 	float specular = clamp(dot(refl, light), 0, 1);
 	//Raised to the power of two - controls highlight tightness
-	specular = specular * specular;
+	specular = pow(specular, 16);
 
 	//Diffuse colour
 	//vec2 uv = worldPosition.xy;
