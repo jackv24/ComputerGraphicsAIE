@@ -11,7 +11,7 @@ uniform mat4 M;
 
 void main() 
 { 
-    worldNormal = M * vec4(normal.xyz, 0); 
+    worldNormal = normalize(M * vec4(normal.xyz, 0)); 
 	worldPosition = M * position;
 
 	gl_Position = MVP * position;

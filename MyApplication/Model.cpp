@@ -7,18 +7,51 @@ Model::Model()
 
 Model::~Model()
 {
+	if (fbxFile != nullptr)
+	{
+		//Clean up vertex data for each mesh
+		for (unsigned int i = 0; i < fbxFile->getMeshCount(); ++i)
+		{
+			FBXMeshNode* mesh = fbxFile->getMeshByIndex(i);
+
+			unsigned int* glData = (unsigned int*)mesh->m_userData;
+
+			glDeleteVertexArrays(1, &glData[0]);
+			glDeleteBuffers(1, &glData[1]);
+			glDeleteBuffers(1, &glData[2]);
+
+			delete[] glData;
+		}
+	}
 }
 
 bool Model::Load(const char* fileName)
 {
-	std::string err;
-	return tinyobj::LoadObj(&attrib, &shapes, &materials, &err, fileName);
+	if (strstr(fileName, ".obj") != NULL)
+	{
+		std::string err;
+		tinyobj::LoadObj(&attrib, &shapes, &materials, &err, fileName);
+		CreateBuffersOBJ();
+		return true;
+	}
+
+	if (strstr(fileName, ".fbx") != NULL)
+	{
+		fbxFile = new FBXFile();
+		fbxFile->load(fileName);
+		CreateBuffersFBX();
+		return true;
+	}
+
+	return false;
 }
 
 bool Model::LoadTexture(const char* fileName)
 {
 	//Load texture from file
-	return m_texture.load(fileName);
+	unsigned int id = Texture::LoadTexture(fileName);
+	m_texture.SetID(id);
+	return id != 0;
 }
 
 void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int programID)
@@ -35,20 +68,31 @@ void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int progr
 	//Texturing
 	//Set texture slot
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_texture.getHandle());
+	glBindTexture(GL_TEXTURE_2D, m_texture.GetID());
 	//Tell shader where it is
 	int loc = glGetUniformLocation(programID, "diffuse");
 	glUniform1i(loc, 0);
 
 	//Bind VertexArrayObjects and draw
-	for (auto& gl : m_glInfo)
+	if (fbxFile != nullptr)
 	{
-		glBindVertexArray(gl.m_VAO);
-		glDrawArrays(GL_TRIANGLES, 0, gl.m_faceCount * 3);
+		for (auto& gl : m_glInfo)
+		{
+			glBindVertexArray(gl.m_VAO);
+			glDrawElements(GL_TRIANGLES, gl.m_index_count, GL_UNSIGNED_INT, 0);
+		}
+	}
+	else
+	{
+		for (auto& gl : m_glInfo)
+		{
+			glBindVertexArray(gl.m_VAO);
+			glDrawArrays(GL_TRIANGLES, 0, gl.m_faceCount * 3);
+		}
 	}
 }
 
-void Model::CreateBuffers()
+void Model::CreateBuffersOBJ()
 {
 	m_glInfo.resize(shapes.size());
 
@@ -113,5 +157,52 @@ void Model::CreateBuffers()
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		shapeIndex++;
+	}
+}
+
+void Model::CreateBuffersFBX()
+{
+	m_glInfo.resize(fbxFile->getMeshCount());
+
+	//Create OpenGL VAO/VBO/IBO data for each mesh
+	for (unsigned int i = 0; i < fbxFile->getMeshCount(); ++i)
+	{
+		FBXMeshNode* mesh = fbxFile->getMeshByIndex(i);
+
+		//Storage for OpenGL data
+		unsigned int* glData = new unsigned int[3];
+
+		//Create buffers
+		glGenVertexArrays(1, &glData[0]);
+		glBindVertexArray(glData[0]);
+
+		glGenBuffers(1, &glData[1]);
+		glGenBuffers(1, &glData[2]);
+
+		glBindBuffer(GL_ARRAY_BUFFER, glData[1]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glData[2]);
+
+		glBufferData(GL_ARRAY_BUFFER, mesh->m_vertices.size() * sizeof(FBXVertex), mesh->m_vertices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->m_indices.size() * sizeof(unsigned int), mesh->m_indices.data(), GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(0); //Position
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), 0);
+
+		glEnableVertexAttribArray(1); //Normal
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(FBXVertex), ((char*)0) + FBXVertex::NormalOffset);
+
+		glEnableVertexAttribArray(2); //UVs
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), ((char*)0) + FBXVertex::TexCoord1Offset);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		mesh->m_userData = glData;
+
+		m_glInfo[i].m_VAO = glData[0];
+		m_glInfo[i].m_VBO = glData[1];
+		m_glInfo[i].m_IBO = glData[2];
+		m_glInfo[i].m_index_count = mesh->m_indices.size();
 	}
 }

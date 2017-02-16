@@ -1,7 +1,8 @@
 #include "gl_core_4_4.h"
 #include "Texture.h"
 
-#define STB_IMAGE_IMPLEMENTATION
+//#define STD_IMAGE_STATIC
+//#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 namespace aie {
@@ -39,8 +40,8 @@ Texture::Texture(unsigned int width, unsigned int height, Format format, unsigne
 Texture::~Texture() {
 	if (m_glHandle != 0)
 		glDeleteTextures(1, &m_glHandle);
-	if (m_loadedPixels != nullptr)
-		stbi_image_free(m_loadedPixels);
+	//if (m_loadedPixels != nullptr)
+		//stbi_image_free(m_loadedPixels);
 }
 
 bool Texture::load(const char* filename) {
@@ -54,7 +55,7 @@ bool Texture::load(const char* filename) {
 	}
 
 	int x = 0, y = 0, comp = 0;
-	m_loadedPixels = stbi_load(filename, &x, &y, &comp, STBI_default);
+	//m_loadedPixels = stbi_load(filename, &x, &y, &comp, STBI_default);
 
 	if (m_loadedPixels != nullptr) {
 		glGenTextures(1, &m_glHandle);

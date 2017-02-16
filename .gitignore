@@ -231,3 +231,5 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+dependencies/FBXLoader/FBXLoader.lib
+dependencies/FBXLoader/FBXLoader_d.lib

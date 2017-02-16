@@ -4,7 +4,8 @@
 #include <glm\ext.hpp>
 #include <vector>
 #include "tiny_obj_loader.h"
-#include <Texture.h>
+#include "Texture.h"
+#include "../dependencies/FBXLoader/FBXFile.h"
 
 class Model
 {
@@ -16,7 +17,8 @@ public:
 	bool LoadTexture(const char* fileName);
 	void Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int programID);
 
-	void CreateBuffers();
+	void CreateBuffersOBJ();
+	void CreateBuffersFBX();
 
 private:
 	tinyobj::attrib_t attrib;
@@ -27,6 +29,8 @@ private:
 	{
 		unsigned int m_VAO;
 		unsigned int m_VBO;
+		unsigned int m_IBO;
+		unsigned int m_index_count;
 		unsigned int m_faceCount;
 	};
 	std::vector<GLInfo> m_glInfo;
@@ -38,6 +42,8 @@ private:
 		float u, v;
 	};
 
-	aie::Texture m_texture;
+	Texture m_texture;
+
+	FBXFile* fbxFile;
 };
 

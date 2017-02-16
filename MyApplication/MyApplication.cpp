@@ -20,8 +20,6 @@ struct Vertex
 };
 
 Model model1;
-Model model2;
-Model model3;
 
 MyApplication::MyApplication()
 {
@@ -54,17 +52,8 @@ bool MyApplication::startup()
 	m_programID = Shader::CompileShaders(vsFile, fsFile);
 	
 	//Load models from file
-	model1.Load("models/Computer_Laptop.obj");
-	model1.CreateBuffers();
-	model1.LoadTexture("textures/Computer_Laptop_D.tga");
-
-	model2.Load("models/sphere.obj");
-	model2.CreateBuffers();
-	model2.LoadTexture("textures/earth_diffuse.jpg");
-
-	model3.Load("models/Dragon.obj");
-	model3.CreateBuffers();
-	model3.LoadTexture("textures/earth_cloud.jpg");
+	model1.Load("models/SpaceDude.fbx");
+	model1.LoadTexture("textures/SpaceDude.tga");
 
 	return true;
 }
@@ -124,17 +113,5 @@ void MyApplication::draw()
 	unsigned int camUniform = glGetUniformLocation(m_programID, "cameraPosition");
 	glUniform4f(camUniform, camera.GetPos().x, camera.GetPos().y, camera.GetPos().z, 1);
 
-	//Draw a bunch of one model
-	for (int i = 0; i < 10; i++)
-	{
-		for (int j = 0; j < 10; j++)
-		{
-			model1.Draw(glm::translate(vec3(i * 2, 0, j * 2)), cameraMatrix, m_programID);
-		}
-	}
-
-	//Draw one of other model
-	model2.Draw(glm::translate(vec3(0, 2, 0)), cameraMatrix, m_programID);
-
-	model3.Draw(glm::translate(vec3(0, 0, -5)), cameraMatrix, m_programID);
+	model1.Draw(glm::translate(vec3(0)), cameraMatrix, m_programID);
 }

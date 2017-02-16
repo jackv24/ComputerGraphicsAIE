@@ -26,7 +26,7 @@ void main()
 	//Diffuse colour
 	//vec2 uv = worldPosition.xy;
 	//Col is flipped texture
-	vec4 col = texture(diffuse, vec2(uv.s, 1-uv.t));
+	vec4 col = texture(diffuse, uv);
 
 	//Final colour
     fragColor = col * (intensity + vec4(specular, specular, specular, 1) + 0.2);
