@@ -46,11 +46,24 @@ bool Model::Load(const char* fileName)
 	return false;
 }
 
-bool Model::LoadTexture(const char* fileName)
+bool Model::LoadTexture(const char* fileName, int map)
 {
 	//Load texture from file
 	unsigned int id = Texture::LoadTexture(fileName);
-	m_texture.SetID(id);
+
+	switch (map)
+	{
+	case 0:
+		m_diffuse.SetID(id);
+		break;
+	case 1:
+		m_normal.SetID(id);
+		break;
+	case 2:
+		m_specular.SetID(id);
+		break;
+	}
+
 	return id != 0;
 }
 
@@ -67,11 +80,29 @@ void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int progr
 
 	//Texturing
 	//Set texture slot
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_texture.GetID());
-	//Tell shader where it is
-	int loc = glGetUniformLocation(programID, "diffuse");
-	glUniform1i(loc, 0);
+	glActiveTexture(GL_TEXTURE0); //Diffuse
+	glBindTexture(GL_TEXTURE_2D, m_diffuse.GetID());
+	int loc1 = glGetUniformLocation(programID, "diffuse");
+	glUniform1i(loc1, 0);
+
+	glActiveTexture(GL_TEXTURE1); //Normal
+	glBindTexture(GL_TEXTURE_2D, m_normal.GetID());
+	int loc2 = glGetUniformLocation(programID, "normal");
+	glUniform1i(loc2, 1);
+
+	glActiveTexture(GL_TEXTURE2); //Specular
+	glBindTexture(GL_TEXTURE_2D, m_specular.GetID());
+	int loc3 = glGetUniformLocation(programID, "specular");
+	glUniform1i(loc3, 2);
+
+	if (isAnimated())
+	{
+		//Grab the skeleton and animation to use
+		FBXSkeleton* skeleton = fbxFile->getSkeletonByIndex(0);
+		skeleton->updateBones();
+		int bones_location = glGetUniformLocation(programID, "bones");
+		glUniformMatrix4fv(bones_location, skeleton->m_boneCount, GL_FALSE, (float*)skeleton->m_bones);
+	}
 
 	//Bind VertexArrayObjects and draw
 	if (fbxFile != nullptr)
@@ -89,6 +120,22 @@ void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int progr
 			glBindVertexArray(gl.m_VAO);
 			glDrawArrays(GL_TRIANGLES, 0, gl.m_faceCount * 3);
 		}
+	}
+}
+
+void Model::Update(float time)
+{
+	if (isAnimated())
+	{
+		//Grab the skeleton and animation to use
+		FBXSkeleton* skeleton = fbxFile->getSkeletonByIndex(0);
+		FBXAnimation* animation = fbxFile->getAnimationByIndex(0);
+
+		//Evaluate the animation to update bones
+		skeleton->evaluate(animation, time);
+
+		for (unsigned int bone_index = 0; bone_index < skeleton->m_boneCount; ++bone_index)
+			skeleton->m_nodes[bone_index]->updateGlobalTransform();
 	}
 }
 
@@ -194,6 +241,15 @@ void Model::CreateBuffersFBX()
 		glEnableVertexAttribArray(2); //UVs
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), ((char*)0) + FBXVertex::TexCoord1Offset);
 
+		//Animation
+		if (isAnimated())
+		{
+			glEnableVertexAttribArray(3); //Weights
+			glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), ((char*)0) + FBXVertex::WeightsOffset);
+			glEnableVertexAttribArray(4); //Indices
+			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), ((char*)0) + FBXVertex::IndicesOffset);
+		}
+
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -205,4 +261,9 @@ void Model::CreateBuffersFBX()
 		m_glInfo[i].m_IBO = glData[2];
 		m_glInfo[i].m_index_count = mesh->m_indices.size();
 	}
+}
+
+bool Model::isAnimated()
+{
+	return fbxFile && fbxFile->getSkeletonCount() > 0;
 }

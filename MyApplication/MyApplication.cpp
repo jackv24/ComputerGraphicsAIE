@@ -45,15 +45,17 @@ bool MyApplication::startup()
 		0.1f, 1000.0f);
 
 	//File path to load shaders from
-	const char* vsFile = "shaders/LitShader.vert";
-	const char* fsFile = "shaders/LitShader.frag";
+	const char* vsFile = "shaders/AnimatedLitShader.vert";
+	const char* fsFile = "shaders/AnimatedLitShader.frag";
 
 	//Load and compile shaders from file
 	m_programID = Shader::CompileShaders(vsFile, fsFile);
 	
 	//Load models from file
-	model1.Load("models/SpaceDude.fbx");
-	model1.LoadTexture("textures/SpaceDude.tga");
+	model1.Load("models/Pyro/pyro.fbx");
+	model1.LoadTexture("models/Pyro/Pyro_D.tga", 0);
+	model1.LoadTexture("models/Pyro/Pyro_N.tga", 1);
+	model1.LoadTexture("models/Pyro/Pyro_S.tga", 2);
 
 	return true;
 }
@@ -85,6 +87,8 @@ void MyApplication::update(float deltaTime)
 			vec3(-10, 0, -10 + i),
 			i == 10 ? white : black);
 	}
+
+	model1.Update(getTime());
 }
 
 void MyApplication::draw()
@@ -113,5 +117,5 @@ void MyApplication::draw()
 	unsigned int camUniform = glGetUniformLocation(m_programID, "cameraPosition");
 	glUniform4f(camUniform, camera.GetPos().x, camera.GetPos().y, camera.GetPos().z, 1);
 
-	model1.Draw(glm::translate(vec3(0)), cameraMatrix, m_programID);
+	model1.Draw(glm::translate(vec3(0)) * glm::scale(vec3(0.005f)), cameraMatrix, m_programID);
 }

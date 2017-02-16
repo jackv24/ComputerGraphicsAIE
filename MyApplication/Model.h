@@ -14,11 +14,14 @@ public:
 	~Model();
 
 	bool Load(const char* fileName);
-	bool LoadTexture(const char* fileName);
+	bool LoadTexture(const char* fileName, int map);
 	void Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int programID);
+	void Update(float time);
 
 	void CreateBuffersOBJ();
 	void CreateBuffersFBX();
+
+	bool isAnimated();
 
 private:
 	tinyobj::attrib_t attrib;
@@ -42,7 +45,9 @@ private:
 		float u, v;
 	};
 
-	Texture m_texture;
+	Texture m_diffuse;
+	Texture m_normal;
+	Texture m_specular;
 
 	FBXFile* fbxFile;
 };
