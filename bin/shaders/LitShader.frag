@@ -31,7 +31,7 @@ void main()
 	vec4 refl = reflect(toCamera, norm);
 	float specPower = clamp(dot(refl, light), 0, 1);
 	//Raised to the power of two - controls highlight tightness
-	specPower = pow(specPower, 4) * 5;
+	specPower = pow(specPower, 8) * 2;
 
 	vec4 spec = texture(specular, uv) * specPower;
 

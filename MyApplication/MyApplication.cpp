@@ -58,10 +58,12 @@ bool MyApplication::startup()
 	animatedModel.LoadTexture("models/Pyro/Pyro_N.tga", 1);
 	animatedModel.LoadTexture("models/Pyro/Pyro_S.tga", 2);
 
-	staticModel.Load("models/cube.obj");
-	staticModel.LoadTexture("textures/barrelBlue.png", 0);
-	staticModel.LoadTexture("textures/NormalMap.png", 1);
-	staticModel.LoadTexture("textures/SpecularMap.png", 2);
+	staticModel.Load("models/sphere.obj");
+	staticModel.LoadTexture("textures/earth_diffuse.jpg", 0);
+	staticModel.LoadTexture("textures/earth_normal.jpg", 1);
+	staticModel.LoadTexture("textures/earth_specular.jpg", 2);
+
+	glDisable(GL_CULL_FACE);
 
 	return true;
 }
@@ -144,6 +146,6 @@ void MyApplication::draw()
 		unsigned int lightUniform = glGetUniformLocation(m_staticShaderID, "light");
 		glUniform4f(lightUniform, sin(m_time), 0.4f, cos(m_time), 1);
 
-		staticModel.Draw(glm::translate(vec3(0, -2.5f, 0)) * glm::scale(vec3(10, 5, 10)), cameraMatrix, m_staticShaderID);
+		staticModel.Draw(glm::translate(vec3(0, -2.5f, 0)) * glm::scale(vec3(10, 10, 10)), cameraMatrix, m_staticShaderID);
 	}
 }
