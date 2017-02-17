@@ -177,7 +177,6 @@
     <ClCompile Include="tiny_obj_loader.cc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\shaders\AnimatedLitShader.frag" />
     <None Include="..\bin\shaders\AnimatedLitShader.vert" />
     <None Include="..\bin\shaders\BasicShader.frag" />
     <None Include="..\bin\shaders\BasicShader.vert" />

@@ -194,12 +194,15 @@ void Model::CreateBuffersOBJ()
 		//Bind vertex data
 		glBindBuffer(GL_ARRAY_BUFFER, m_glInfo[shapeIndex].m_VBO);
 		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(OBJVertex), vertices.data(), GL_STATIC_DRAW);
+
 		glEnableVertexAttribArray(0); //Position
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(OBJVertex), 0);
-		glEnableVertexAttribArray(1); //Normal data
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, sizeof(OBJVertex), (void*)12);
-		glEnableVertexAttribArray(2); //Tex coords
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(OBJVertex), (void*)24);
+
+		glEnableVertexAttribArray(1); //Tex coords
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(OBJVertex), (void*)24);
+
+		glEnableVertexAttribArray(2); //Normal data
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_TRUE, sizeof(OBJVertex), (void*)12);
 
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -235,19 +238,22 @@ void Model::CreateBuffersFBX()
 		glEnableVertexAttribArray(0); //Position
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), 0);
 
-		glEnableVertexAttribArray(1); //Normal
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(FBXVertex), ((char*)0) + FBXVertex::NormalOffset);
+		glEnableVertexAttribArray(1); //UVs
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), ((char*)0) + FBXVertex::TexCoord1Offset);
 
-		glEnableVertexAttribArray(2); //UVs
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), ((char*)0) + FBXVertex::TexCoord1Offset);
+		glEnableVertexAttribArray(2); //Normal
+		glVertexAttribPointer(2, 4, GL_FLOAT, GL_TRUE, sizeof(FBXVertex), ((char*)0) + FBXVertex::NormalOffset);
+
+		glEnableVertexAttribArray(3); //Tangents
+		glVertexAttribPointer(3, 2, GL_FLOAT, GL_TRUE, sizeof(FBXVertex), ((char*)0) + FBXVertex::TangentOffset);
 
 		//Animation
 		if (isAnimated())
 		{
-			glEnableVertexAttribArray(3); //Weights
-			glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), ((char*)0) + FBXVertex::WeightsOffset);
-			glEnableVertexAttribArray(4); //Indices
-			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), ((char*)0) + FBXVertex::IndicesOffset);
+			glEnableVertexAttribArray(4); //Weights
+			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), ((char*)0) + FBXVertex::WeightsOffset);
+			glEnableVertexAttribArray(5); //Indices
+			glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), ((char*)0) + FBXVertex::IndicesOffset);
 		}
 
 		glBindVertexArray(0);

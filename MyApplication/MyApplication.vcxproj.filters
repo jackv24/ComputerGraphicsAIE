@@ -88,9 +88,6 @@
     <None Include="..\bin\shaders\WaveShader.vert">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\bin\shaders\AnimatedLitShader.frag">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\bin\shaders\AnimatedLitShader.vert">
       <Filter>Resource Files</Filter>
     </None>

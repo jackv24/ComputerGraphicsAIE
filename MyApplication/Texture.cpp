@@ -11,8 +11,31 @@ unsigned int Texture::LoadTexture(const char* name)
 
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageWidth, imageHeight,
-		0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+	switch (imageFormat)
+	{
+	case STBI_grey:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, imageWidth, imageHeight,
+			0, GL_RED, GL_UNSIGNED_BYTE, data);
+		break;
+	case STBI_grey_alpha:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG, imageWidth, imageHeight,
+			0, GL_RG, GL_UNSIGNED_BYTE, data);
+		break;
+	case STBI_rgb:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageWidth, imageHeight,
+			0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		break;
+	case STBI_rgb_alpha:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight,
+			0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		break;
+	default:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageWidth, imageHeight,
+			0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		break;
+	};
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 

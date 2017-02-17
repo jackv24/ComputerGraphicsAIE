@@ -1,33 +1,44 @@
 // shadertype=glsl
 #version 410
-in vec4 worldNormal;
 in vec4 worldPosition;
 in vec2 uv;
+in vec4 worldNormal;
+in vec3 vNormal;
+in vec3 vTangent;
+in vec3 vBiTangent;
+
 out vec4 fragColor;
 
 uniform vec4 cameraPosition;
 uniform sampler2D diffuse;
+uniform sampler2D normal;
+uniform sampler2D specular;
+uniform vec4 light;
 
 void main() 
 { 
-	//Hardcoded light direction
-	vec4 light = vec4(0.5, 0.7, 0.5, 0);
+	//Normal map
+	mat3 TBN = mat3(normalize(vTangent), normalize(vBiTangent), normalize(vNormal));
+	vec3 N = texture(normal, uv).xyz * 2 - 1;
+
+	vec4 norm = vec4(TBN * N, 0);
 
 	//Diffuse
-	float intensity = clamp(dot(light, worldNormal), 0, 1);
+	float intensity = clamp(dot(light, norm), 0, 1);
 
 	//Specular
 	vec4 toCamera = normalize(worldPosition - cameraPosition);
-	vec4 refl = reflect(toCamera, worldNormal);
-	float specular = clamp(dot(refl, light), 0, 1);
+	vec4 refl = reflect(toCamera, norm);
+	float specPower = clamp(dot(refl, light), 0, 1);
 	//Raised to the power of two - controls highlight tightness
-	specular = pow(specular, 16);
+	specPower = pow(specPower, 4) * 5;
+
+	vec4 spec = texture(specular, uv) * specPower;
 
 	//Diffuse colour
-	//vec2 uv = worldPosition.xy;
-	//Col is flipped texture
 	vec4 col = texture(diffuse, uv);
 
 	//Final colour
-    fragColor = col * (intensity + vec4(specular, specular, specular, 1) + 0.2);
+    fragColor = col * (intensity + vec4(spec.xyz, 1) + 0.2);
+
 }

@@ -19,7 +19,11 @@ struct Vertex
 	glm::vec4 colour;
 };
 
-Model model1;
+unsigned int m_staticShaderID;
+unsigned int m_animatedShaderID;
+
+Model staticModel;
+Model animatedModel;
 
 MyApplication::MyApplication()
 {
@@ -44,18 +48,20 @@ bool MyApplication::startup()
 		getWindowWidth() / (float)getWindowHeight(),
 		0.1f, 1000.0f);
 
-	//File path to load shaders from
-	const char* vsFile = "shaders/AnimatedLitShader.vert";
-	const char* fsFile = "shaders/AnimatedLitShader.frag";
-
 	//Load and compile shaders from file
-	m_programID = Shader::CompileShaders(vsFile, fsFile);
+	m_staticShaderID = Shader::CompileShaders("shaders/LitShader.vert", "shaders/LitShader.frag");
+	m_animatedShaderID = Shader::CompileShaders("shaders/AnimatedLitShader.vert", "shaders/LitShader.frag");
 	
 	//Load models from file
-	model1.Load("models/Pyro/pyro.fbx");
-	model1.LoadTexture("models/Pyro/Pyro_D.tga", 0);
-	model1.LoadTexture("models/Pyro/Pyro_N.tga", 1);
-	model1.LoadTexture("models/Pyro/Pyro_S.tga", 2);
+	animatedModel.Load("models/Pyro/pyro.fbx");
+	animatedModel.LoadTexture("models/Pyro/Pyro_D.tga", 0);
+	animatedModel.LoadTexture("models/Pyro/Pyro_N.tga", 1);
+	animatedModel.LoadTexture("models/Pyro/Pyro_S.tga", 2);
+
+	staticModel.Load("models/cube.obj");
+	staticModel.LoadTexture("textures/barrelBlue.png", 0);
+	staticModel.LoadTexture("textures/NormalMap.png", 1);
+	staticModel.LoadTexture("textures/SpecularMap.png", 2);
 
 	return true;
 }
@@ -88,7 +94,7 @@ void MyApplication::update(float deltaTime)
 			i == 10 ? white : black);
 	}
 
-	model1.Update(getTime());
+	animatedModel.Update(getTime());
 }
 
 void MyApplication::draw()
@@ -105,17 +111,39 @@ void MyApplication::draw()
 	//Draw gizmos with virtual camera
 	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
 
-	//Bind shader program, insturcting OpenGL which shaders to use
-	glUseProgram(m_programID);
+	//ANIMATED MODEL
+	{
+		//Bind shader program, insturcting OpenGL which shaders to use
+		glUseProgram(m_animatedShaderID);
 
-	//Pass in time and heightscale for animation
-	unsigned int timeUniform = glGetUniformLocation(m_programID, "time");
-	glUniform1f(timeUniform, m_time);
-	unsigned int heightScaleUniform = glGetUniformLocation(m_programID, "heightScale");
-	glUniform1f(heightScaleUniform, m_heightScale);
-	//Pass in camera position
-	unsigned int camUniform = glGetUniformLocation(m_programID, "cameraPosition");
-	glUniform4f(camUniform, camera.GetPos().x, camera.GetPos().y, camera.GetPos().z, 1);
+		//Pass in time and heightscale for animation
+		unsigned int timeUniform = glGetUniformLocation(m_animatedShaderID, "time");
+		glUniform1f(timeUniform, m_time);
+		//Pass in camera position
+		unsigned int camUniform = glGetUniformLocation(m_animatedShaderID, "cameraPosition");
+		glUniform4f(camUniform, camera.GetPos().x, camera.GetPos().y, camera.GetPos().z, 1);
 
-	model1.Draw(glm::translate(vec3(0)) * glm::scale(vec3(0.005f)), cameraMatrix, m_programID);
+		unsigned int lightUniform = glGetUniformLocation(m_animatedShaderID, "light");
+		glUniform4f(lightUniform, sin(m_time), 0.4f, cos(m_time), 1);
+
+		animatedModel.Draw(glm::translate(vec3(0)) * glm::scale(vec3(0.005f)), cameraMatrix, m_animatedShaderID);
+	}
+
+	//STATIC MODEL
+	{
+		//Bind shader program, insturcting OpenGL which shaders to use
+		glUseProgram(m_staticShaderID);
+
+		//Pass in time and heightscale for animation
+		unsigned int timeUniform = glGetUniformLocation(m_staticShaderID, "time");
+		glUniform1f(timeUniform, m_time);
+		//Pass in camera position
+		unsigned int camUniform = glGetUniformLocation(m_staticShaderID, "cameraPosition");
+		glUniform4f(camUniform, camera.GetPos().x, camera.GetPos().y, camera.GetPos().z, 1);
+
+		unsigned int lightUniform = glGetUniformLocation(m_staticShaderID, "light");
+		glUniform4f(lightUniform, sin(m_time), 0.4f, cos(m_time), 1);
+
+		staticModel.Draw(glm::translate(vec3(0, -2.5f, 0)) * glm::scale(vec3(10, 5, 10)), cameraMatrix, m_staticShaderID);
+	}
 }
