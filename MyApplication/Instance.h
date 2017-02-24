@@ -14,6 +14,8 @@ public:
 	void SetShader(unsigned int shaderID);
 
 	void SetPosition(glm::vec3 position);
+	void SetRotation(glm::vec3 eulerAngles);
+	void SetScale(glm::vec3 scale);
 
 	void UpdateTransform();
 	void Draw(glm::mat4 cameraMatrix, glm::vec3 cameraPos, float time);

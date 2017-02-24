@@ -37,11 +37,17 @@ void main()
 	N += bones[index.z] * norm * weights.z;
 	N += bones[index.w] * norm * weights.w;
 
+	vec4 tang = vec4(tangent.xyz, 0);
+	vec4 T = bones[index.x] * tang * weights.x;
+	T += bones[index.y] * tang * weights.y;
+	T += bones[index.z] * tang * weights.z;
+	T += bones[index.w] * tang * weights.w;
+
     worldNormal = normalize(M * N); 
 	worldPosition = M * P;
 
 	vNormal = N.xyz;
-	vTangent = tangent.xyz;
+	vTangent = T.xyz;
 	vBiTangent = cross(vNormal, vTangent);
 
 	gl_Position = MVP * P;

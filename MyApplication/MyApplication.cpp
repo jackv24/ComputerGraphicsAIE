@@ -24,6 +24,7 @@ unsigned int m_staticShaderID;
 unsigned int m_animatedShaderID;
 
 Model* staticModel;
+Model* animatedModel;
 
 Texture* testDiffuse;
 Texture* testNormal;
@@ -38,6 +39,7 @@ MyApplication::MyApplication()
 MyApplication::~MyApplication()
 {
 	delete staticModel;
+	delete animatedModel;
 
 	delete testDiffuse;
 	delete testNormal;
@@ -78,6 +80,12 @@ bool MyApplication::startup()
 	staticModel->LoadTexture("textures/soulspear_normal.tga", 1);
 	staticModel->LoadTexture("textures/soulspear_specular.tga", 2);
 
+	animatedModel = new Model();
+	animatedModel->Load("models/Pyro/pyro.fbx");
+	animatedModel->LoadTexture("models/Pyro/Pyro_D.tga", 0);
+	animatedModel->LoadTexture("models/Pyro/Pyro_N.tga", 1);
+	animatedModel->LoadTexture("models/Pyro/Pyro_S.tga", 2);
+
 	//Create instances
 	Instance* inst;
 
@@ -91,6 +99,11 @@ bool MyApplication::startup()
 
 	inst = new Instance(staticModel, Shader::CompileShaders("shaders/WaveShader.vert", "shaders/LitShader.frag"), nullptr, nullptr, nullptr);
 	inst->SetPosition(vec3(6, 0, 0));
+	instances.push_back(inst);
+
+	inst = new Instance(animatedModel, m_animatedShaderID, nullptr, nullptr, nullptr);
+	inst->SetPosition(vec3(-5, 0, 0));
+	inst->SetScale(vec3(0.005));
 	instances.push_back(inst);
 
 	return true;

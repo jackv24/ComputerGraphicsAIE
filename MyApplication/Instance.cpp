@@ -31,6 +31,8 @@ Instance::~Instance()
 void Instance::SetShader(unsigned int shaderID) { m_shaderID = shaderID; }
 
 void Instance::SetPosition(glm::vec3 position) { m_position = position; }
+void Instance::SetRotation(glm::vec3 eulerAngles) { m_eulerAngles = eulerAngles; }
+void Instance::SetScale(glm::vec3 scale) { m_scale = scale; }
 
 void Instance::UpdateTransform()
 {
@@ -66,6 +68,7 @@ void Instance::Draw(glm::mat4 cameraMatrix, glm::vec3 cameraPos, float time)
 
 		//Draw model
 		UpdateTransform();
+		m_model->Update(time);
 		m_model->Draw(m_transform, cameraMatrix, m_shaderID, m_diffuse, m_normal, m_specular);
 	}
 }
