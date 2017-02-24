@@ -7,6 +7,7 @@
 #include <iostream>
 #include "Shader.h"
 #include "Model.h"
+#include "Instance.h"
 
 using glm::vec3;
 using glm::vec4;
@@ -22,8 +23,13 @@ struct Vertex
 unsigned int m_staticShaderID;
 unsigned int m_animatedShaderID;
 
-Model staticModel;
-Model animatedModel;
+Model* staticModel;
+
+Texture* testDiffuse;
+Texture* testNormal;
+Texture* testSpecular;
+
+std::vector<Instance*> instances;
 
 MyApplication::MyApplication()
 {
@@ -31,6 +37,11 @@ MyApplication::MyApplication()
 
 MyApplication::~MyApplication()
 {
+	delete staticModel;
+
+	delete testDiffuse;
+	delete testNormal;
+	delete testSpecular;
 }
 
 bool MyApplication::startup()
@@ -52,16 +63,35 @@ bool MyApplication::startup()
 	m_staticShaderID = Shader::CompileShaders("shaders/LitShader.vert", "shaders/LitShader.frag");
 	m_animatedShaderID = Shader::CompileShaders("shaders/AnimatedLitShader.vert", "shaders/LitShader.frag");
 	
-	//Load models from file
-	animatedModel.Load("models/Pyro/pyro.fbx");
-	animatedModel.LoadTexture("models/Pyro/Pyro_D.tga", 0);
-	animatedModel.LoadTexture("models/Pyro/Pyro_N.tga", 1);
-	animatedModel.LoadTexture("models/Pyro/Pyro_S.tga", 2);
+	//Load textures
+	testDiffuse = new Texture();
+	testDiffuse->SetID(Texture::LoadTexture("textures/numbered_grid.tga"));
+	testNormal = new Texture();
+	testNormal->SetID(Texture::LoadTexture("textures/NormalMap.png"));
+	testSpecular = new Texture();
+	testSpecular->SetID(Texture::LoadTexture("textures/SpecularMap.png"));
 
-	staticModel.Load("models/soulspear.obj");
-	staticModel.LoadTexture("textures/soulspear_diffuse.tga", 0);
-	staticModel.LoadTexture("textures/soulspear_normal.tga", 1);
-	staticModel.LoadTexture("textures/soulspear_specular.tga", 2);
+	//Load models from file
+	staticModel = new Model();
+	staticModel->Load("models/soulspear.obj");
+	staticModel->LoadTexture("textures/soulspear_diffuse.tga", 0);
+	staticModel->LoadTexture("textures/soulspear_normal.tga", 1);
+	staticModel->LoadTexture("textures/soulspear_specular.tga", 2);
+
+	//Create instances
+	Instance* inst;
+
+	inst = new Instance(staticModel, m_staticShaderID, nullptr, nullptr, nullptr);
+	inst->SetPosition(vec3(0));
+	instances.push_back(inst);
+
+	inst = new Instance(staticModel, m_staticShaderID, testDiffuse, testNormal, testNormal);
+	inst->SetPosition(vec3(3, 0, 0));
+	instances.push_back(inst);
+
+	inst = new Instance(staticModel, Shader::CompileShaders("shaders/WaveShader.vert", "shaders/LitShader.frag"), nullptr, nullptr, nullptr);
+	inst->SetPosition(vec3(6, 0, 0));
+	instances.push_back(inst);
 
 	return true;
 }
@@ -93,8 +123,6 @@ void MyApplication::update(float deltaTime)
 			vec3(-10, 0, -10 + i),
 			i == 10 ? white : black);
 	}
-
-	animatedModel.Update(getTime());
 }
 
 void MyApplication::draw()
@@ -111,39 +139,10 @@ void MyApplication::draw()
 	//Draw gizmos with virtual camera
 	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
 
-	//ANIMATED MODEL
+
+	//Draw instances
+	for (unsigned int i = 0; i < instances.size(); i++)
 	{
-		//Bind shader program, insturcting OpenGL which shaders to use
-		glUseProgram(m_animatedShaderID);
-
-		//Pass in time and heightscale for animation
-		unsigned int timeUniform = glGetUniformLocation(m_animatedShaderID, "time");
-		glUniform1f(timeUniform, m_time);
-		//Pass in camera position
-		unsigned int camUniform = glGetUniformLocation(m_animatedShaderID, "cameraPosition");
-		glUniform4f(camUniform, camera.GetPos().x, camera.GetPos().y, camera.GetPos().z, 1);
-
-		unsigned int lightUniform = glGetUniformLocation(m_animatedShaderID, "light");
-		glUniform4f(lightUniform, sin(m_time), 0.4f, cos(m_time), 1);
-
-		animatedModel.Draw(glm::translate(vec3(0)) * glm::scale(vec3(0.005f)), cameraMatrix, m_animatedShaderID);
-	}
-
-	//STATIC MODEL
-	{
-		//Bind shader program, insturcting OpenGL which shaders to use
-		glUseProgram(m_staticShaderID);
-
-		//Pass in time and heightscale for animation
-		unsigned int timeUniform = glGetUniformLocation(m_staticShaderID, "time");
-		glUniform1f(timeUniform, m_time);
-		//Pass in camera position
-		unsigned int camUniform = glGetUniformLocation(m_staticShaderID, "cameraPosition");
-		glUniform4f(camUniform, camera.GetPos().x, camera.GetPos().y, camera.GetPos().z, 1);
-
-		unsigned int lightUniform = glGetUniformLocation(m_staticShaderID, "light");
-		glUniform4f(lightUniform, sin(m_time), 0.4f, cos(m_time), 1);
-
-		staticModel.Draw(glm::translate(vec3(5, 0, 0)) * glm::scale(vec3(2)), cameraMatrix, m_staticShaderID);
+		instances[i]->Draw(cameraMatrix, camera.GetPos(), getTime());
 	}
 }

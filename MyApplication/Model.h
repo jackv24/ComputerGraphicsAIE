@@ -15,13 +15,17 @@ public:
 
 	bool Load(const char* fileName);
 	bool LoadTexture(const char* fileName, int map);
-	void Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int programID);
+	void Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int programID, Texture* diffuse, Texture* normal, Texture* specular);
 	void Update(float time);
 
 	void CreateBuffersOBJ();
 	void CreateBuffersFBX();
 
 	bool isAnimated();
+
+	Texture m_diffuse;
+	Texture m_normal;
+	Texture m_specular;
 
 private:
 	tinyobj::attrib_t attrib;
@@ -44,10 +48,6 @@ private:
 		float nx, ny, nz;
 		float u, v;
 	};
-
-	Texture m_diffuse;
-	Texture m_normal;
-	Texture m_specular;
 
 	FBXFile* fbxFile;
 };

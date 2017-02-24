@@ -3,6 +3,7 @@
 
 Model::Model()
 {
+	fbxFile = NULL;
 }
 
 Model::~Model()
@@ -22,6 +23,8 @@ Model::~Model()
 
 			delete[] glData;
 		}
+
+		delete fbxFile;
 	}
 }
 
@@ -67,7 +70,7 @@ bool Model::LoadTexture(const char* fileName, int map)
 	return id != 0;
 }
 
-void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int programID)
+void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int programID, Texture* diffuse, Texture* normal, Texture* specular)
 {
 	glm::mat4 mvp = cameraMatrix * transform;
 
@@ -81,17 +84,17 @@ void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int progr
 	//Texturing
 	//Set texture slot
 	glActiveTexture(GL_TEXTURE0); //Diffuse
-	glBindTexture(GL_TEXTURE_2D, m_diffuse.GetID());
+	glBindTexture(GL_TEXTURE_2D, diffuse->GetID());
 	int loc1 = glGetUniformLocation(programID, "diffuse");
 	glUniform1i(loc1, 0);
 
 	glActiveTexture(GL_TEXTURE1); //Normal
-	glBindTexture(GL_TEXTURE_2D, m_normal.GetID());
+	glBindTexture(GL_TEXTURE_2D, normal->GetID());
 	int loc2 = glGetUniformLocation(programID, "normal");
 	glUniform1i(loc2, 1);
 
 	glActiveTexture(GL_TEXTURE2); //Specular
-	glBindTexture(GL_TEXTURE_2D, m_specular.GetID());
+	glBindTexture(GL_TEXTURE_2D, specular->GetID());
 	int loc3 = glGetUniformLocation(programID, "specular");
 	glUniform1i(loc3, 2);
 

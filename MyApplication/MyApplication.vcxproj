@@ -158,6 +158,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Instance.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="MyApplication.h" />
     <ClInclude Include="Shader.h" />
@@ -168,6 +169,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Instance.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="MyApplication.cpp" />
@@ -182,7 +184,6 @@
     <None Include="..\bin\shaders\BasicShader.vert" />
     <None Include="..\bin\shaders\LitShader.frag" />
     <None Include="..\bin\shaders\LitShader.vert" />
-    <None Include="..\bin\shaders\WaveShader.frag" />
     <None Include="..\bin\shaders\WaveShader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

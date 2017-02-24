@@ -1,19 +1,33 @@
 #version 410
-
 layout(location=0) in vec4 position;
-layout(location=1) in vec4 colour;
-out vec4 vColour;
+layout(location=1) in vec2 uvs;
+layout(location=2) in vec4 normal;
+layout(location=3) in vec4 tangent;
 
-uniform mat4 projectionViewWorldMatrix;
+out vec4 worldPosition;
+out vec2 uv;
+out vec4 worldNormal;
+out vec3 vNormal;
+out vec3 vTangent;
+out vec3 vBiTangent;
+
+uniform mat4 MVP;
+uniform mat4 M;
 uniform float time;
-uniform float heightScale;
 
-void main()
-{
-	vColour = colour;
+void main() 
+{ 
 	vec4 p = position;
+	p.z += sin(time + (position.x + position.y) / 2);
 
-	p.y += sin(time + (position.x + position.z) / 2) * heightScale;
+    worldNormal = normalize(M * normal); 
+	worldPosition = M * p;
 
-	gl_Position = projectionViewWorldMatrix * p;
+	vNormal = normal.xyz;
+	vTangent = tangent.xyz;
+	vBiTangent = cross(vNormal, vTangent);
+
+	gl_Position = MVP * p;
+
+	uv = uvs;
 }
