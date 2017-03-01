@@ -1,5 +1,6 @@
 #include "Instance.h"
 #include <gl_core_4_4.h>
+#include "Scene.h"
 
 Instance::Instance(Model* model, unsigned int shaderID, Texture* diffuse, Texture* normal, Texture* specular)
 {
@@ -47,8 +48,13 @@ void Instance::UpdateTransform()
 		* glm::scale(m_scale);
 }
 
-void Instance::Draw(glm::mat4 cameraMatrix, glm::vec3 cameraPos, float time)
+void Instance::Draw(Scene* scene, float time)
 {
+	glm::vec3 cameraPos = scene->camera.GetPos();
+	glm::vec3 lightDir = glm::normalize(scene->m_lightDir);
+
+	glm::mat4 cameraMatrix = scene->camera.GetCameraMatrix();
+
 	if (m_model)
 	{
 		//Bind shader program, insturcting OpenGL which shaders to use
@@ -63,7 +69,7 @@ void Instance::Draw(glm::mat4 cameraMatrix, glm::vec3 cameraPos, float time)
 		glUniform4f(camUniform, cameraPos.x, cameraPos.y, cameraPos.z, 1);
 
 		unsigned int lightUniform = glGetUniformLocation(m_shaderID, "light");
-		glUniform4f(lightUniform, 0.2f, 0.4f, 0.8f, 1);
+		glUniform4f(lightUniform, lightDir.x, lightDir.y, lightDir.z, 1);
 
 
 		//Draw model

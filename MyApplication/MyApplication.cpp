@@ -8,6 +8,8 @@
 #include "Shader.h"
 #include "Model.h"
 #include "Instance.h"
+#include "Scene.h"
+#include <imgui.h>
 
 using glm::vec3;
 using glm::vec4;
@@ -23,14 +25,14 @@ struct Vertex
 unsigned int m_staticShaderID;
 unsigned int m_animatedShaderID;
 
+Scene scene;
+
 Model* staticModel;
 Model* animatedModel;
 
 Texture* testDiffuse;
 Texture* testNormal;
 Texture* testSpecular;
-
-std::vector<Instance*> instances;
 
 MyApplication::MyApplication()
 {
@@ -53,13 +55,6 @@ bool MyApplication::startup()
 
 	//Initialise gizmo primitive counts
 	Gizmos::create(10000, 10000, 10000, 10000);
-
-	//Create virtual camera transforms
-	m_viewMatrix = glm::lookAt(vec3(10), vec3(0), vec3(0, 1, 0));
-	m_projectionMatrix = glm::perspective(
-		glm::pi<float>() * 0.25f,
-		getWindowWidth() / (float)getWindowHeight(),
-		0.1f, 1000.0f);
 
 	//Load and compile shaders from file
 	m_staticShaderID = Shader::CompileShaders("shaders/LitShader.vert", "shaders/LitShader.frag");
@@ -91,20 +86,20 @@ bool MyApplication::startup()
 
 	inst = new Instance(staticModel, m_staticShaderID, nullptr, nullptr, nullptr);
 	inst->SetPosition(vec3(0));
-	instances.push_back(inst);
+	scene.m_instances.push_back(inst);
 
 	inst = new Instance(staticModel, m_staticShaderID, testDiffuse, testNormal, testNormal);
 	inst->SetPosition(vec3(3, 0, 0));
-	instances.push_back(inst);
+	scene.m_instances.push_back(inst);
 
 	inst = new Instance(staticModel, Shader::CompileShaders("shaders/WaveShader.vert", "shaders/LitShader.frag"), nullptr, nullptr, nullptr);
 	inst->SetPosition(vec3(6, 0, 0));
-	instances.push_back(inst);
+	scene.m_instances.push_back(inst);
 
 	inst = new Instance(animatedModel, m_animatedShaderID, nullptr, nullptr, nullptr);
 	inst->SetPosition(vec3(-5, 0, 0));
 	inst->SetScale(vec3(0.005));
-	instances.push_back(inst);
+	scene.m_instances.push_back(inst);
 
 	return true;
 }
@@ -119,7 +114,7 @@ void MyApplication::update(float deltaTime)
 	m_time += deltaTime;
 
 	//Update camera
-	camera.Update(deltaTime);
+	scene.camera.Update(getWindowWidth(), getWindowHeight(), deltaTime);
 
 	//Gizmos
 	Gizmos::clear();
@@ -143,19 +138,19 @@ void MyApplication::draw()
 	//Wipe screen
 	clearScreen();
 
-	//Update perspective in case window resized
-	m_projectionMatrix = camera.GetProjectionMatrix((float)getWindowWidth(), (float)getWindowHeight());
-	m_viewMatrix = camera.GetViewMatrix();
+	//Draw UI
+	ImGui::Begin("Light");
+	ImGui::SliderFloat3("Light Direction", &scene.m_lightDir.x, -1, 1);
+	ImGui::End();
 
-	glm::mat4 cameraMatrix = m_projectionMatrix * m_viewMatrix;
+	//Draw scene stuff and gizmos
+	float screenWidth = getWindowWidth();
+	float screenHeight = getWindowHeight();
+	float time = getTime();
 
 	//Draw gizmos with virtual camera
-	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
-
+	Gizmos::draw(scene.camera.GetCameraMatrix());
 
 	//Draw instances
-	for (unsigned int i = 0; i < instances.size(); i++)
-	{
-		instances[i]->Draw(cameraMatrix, camera.GetPos(), getTime());
-	}
+	scene.Draw(screenWidth, screenHeight, time);
 }

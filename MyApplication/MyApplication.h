@@ -19,11 +19,6 @@ public:
 	virtual void draw();
 
 protected:
-	glm::mat4 m_viewMatrix;
-	glm::mat4 m_projectionMatrix;
-
-	Camera camera;
-
 	unsigned int rows = 20;
 	unsigned int cols = 20;
 

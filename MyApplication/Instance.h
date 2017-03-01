@@ -5,6 +5,8 @@
 #include "Texture.h"
 #include "Model.h"
 
+class Scene;
+
 class Instance
 {
 public:
@@ -18,7 +20,7 @@ public:
 	void SetScale(glm::vec3 scale);
 
 	void UpdateTransform();
-	void Draw(glm::mat4 cameraMatrix, glm::vec3 cameraPos, float time);
+	void Draw(Scene* scene, float time);
 
 private:
 	glm::vec3 m_position;

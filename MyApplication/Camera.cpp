@@ -15,8 +15,11 @@ Camera::~Camera()
 {
 }
 
-void Camera::Update(float deltaTime)
+void Camera::Update(float width, float height, float deltaTime)
 {
+	m_width = width;
+	m_height = height;
+
 	//Get input instance
 	aie::Input* input = aie::Input::getInstance();
 
@@ -67,9 +70,9 @@ void Camera::Update(float deltaTime)
 	lastMouseY = my;
 }
 
-glm::mat4 Camera::GetProjectionMatrix(float w, float h)
+glm::mat4 Camera::GetProjectionMatrix()
 {
-	return glm::perspective(glm::pi<float>() * 0.25f, w / h, 0.1f, 1000.0f);
+	return glm::perspective(glm::pi<float>() * 0.25f, m_width / m_height, 0.1f, 1000.0f);
 }
 
 glm::mat4 Camera::GetViewMatrix()
@@ -83,6 +86,11 @@ glm::mat4 Camera::GetViewMatrix()
 
 	//Return view matrix
 	return glm::lookAt(position, position + forward, glm::vec3(0, 1, 0));
+}
+
+glm::mat4 Camera::GetCameraMatrix()
+{
+	return GetProjectionMatrix() * GetViewMatrix();
 }
 
 glm::vec3 Camera::GetPos()

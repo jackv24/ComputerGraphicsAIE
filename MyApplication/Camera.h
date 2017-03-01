@@ -9,10 +9,11 @@ public:
 	Camera() : theta(0), phi(-20), position(-10, 4, 0) {}
 	~Camera();
 
-	void Update(float deltaTime);
+	void Update(float width, float height, float deltaTime);
 
-	glm::mat4 GetProjectionMatrix(float w, float h);
+	glm::mat4 GetProjectionMatrix();
 	glm::mat4 GetViewMatrix();
+	glm::mat4 GetCameraMatrix();
 
 	glm::vec3 GetPos();
 
@@ -23,5 +24,8 @@ private:
 	float pitchLimit = 80.0f;
 
 	glm::vec3 position;
+
+	float m_width = 0;
+	float m_height = 0;
 };
 
