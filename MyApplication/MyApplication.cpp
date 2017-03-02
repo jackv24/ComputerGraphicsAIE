@@ -37,7 +37,11 @@ Texture* testSpecular;
 
 Framebuffer* frameBuffer;
 Model* quadModel;
-unsigned int m_postProcessShaderID;
+unsigned int m_postProcessBaseID;
+unsigned int m_postProcessBoxBlurID;
+unsigned int m_postProcessDistortID;
+unsigned int m_postProcessSobelID;
+unsigned int m_usingPostProcessID;
 
 MyApplication::MyApplication()
 {
@@ -72,7 +76,11 @@ bool MyApplication::startup()
 	quadModel = new Model();
 	quadModel->MakePostProcessQuad(getWindowWidth(), getWindowHeight());
 	frameBuffer->m_model = quadModel;
-	m_postProcessShaderID = Shader::CompileShaders("shaders/PostProcessBase.vert", "shaders/PostProcessBase.frag");
+	m_postProcessBaseID = Shader::CompileShaders("shaders/PostProcessBase.vert", "shaders/PostProcessBase.frag");
+	m_postProcessBoxBlurID = Shader::CompileShaders("shaders/PostProcessBase.vert", "shaders/PostProcessBoxBlur.frag");
+	m_postProcessDistortID = Shader::CompileShaders("shaders/PostProcessBase.vert", "shaders/PostProcessDistort.frag");
+	m_postProcessSobelID = Shader::CompileShaders("shaders/PostProcessBase.vert", "shaders/PostProcessSobel.frag");
+	m_usingPostProcessID = m_postProcessBaseID;
 
 	//Load and compile shaders from file
 	m_staticShaderID = Shader::CompileShaders("shaders/LitShader.vert", "shaders/LitShader.frag");
@@ -164,6 +172,17 @@ void MyApplication::draw()
 	ImGui::SliderFloat3("Light Direction", &scene.m_lightDir.x, -1, 1);
 	ImGui::End();
 
+	ImGui::Begin("Post Processing");
+	if (ImGui::Button("None"))
+		m_usingPostProcessID = m_postProcessBaseID;
+	if (ImGui::Button("Box Blur"))
+		m_usingPostProcessID = m_postProcessBoxBlurID;
+	if (ImGui::Button("Distort"))
+		m_usingPostProcessID = m_postProcessDistortID;
+	if (ImGui::Button("Sobel"))
+		m_usingPostProcessID = m_postProcessSobelID;
+	ImGui::End();
+
 	//Draw scene stuff and gizmos
 	float screenWidth = getWindowWidth();
 	float screenHeight = getWindowHeight();
@@ -175,5 +194,5 @@ void MyApplication::draw()
 	//Draw framebuffer
 	frameBuffer->RenderScene(scene);
 	//Draw scene
-	frameBuffer->Draw(m_postProcessShaderID);
+	frameBuffer->Draw(m_usingPostProcessID);
 }

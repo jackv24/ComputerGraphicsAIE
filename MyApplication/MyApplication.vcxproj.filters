@@ -112,5 +112,14 @@
     <None Include="..\bin\shaders\PostProcessBase.vert">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\bin\shaders\PostProcessDistort.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\bin\shaders\PostProcessSobel.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\bin\shaders\PostProcessBoxBlur.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
