@@ -276,3 +276,42 @@ bool Model::isAnimated()
 {
 	return fbxFile && fbxFile->getSkeletonCount() > 0;
 }
+
+void Model::MakePostProcessQuad(int width, int height)
+{
+	m_glInfo.resize(1);
+
+	//Fullscreen quad
+	glm::vec2 halfTexel = 1.0f / glm::vec2(width, height) * 0.5f;
+
+	float vertexData[] = {
+		-1, -1, 0, 1, halfTexel.x, halfTexel.y,
+		1, 1, 0, 1, 1 - halfTexel.x, 1 - halfTexel.y,
+		-1, 1, 0, 1, halfTexel.x, 1 - halfTexel.y,
+		-1, -1, 0, 1, halfTexel.x, halfTexel.y,
+		1, -1, 0, 1, 1 - halfTexel.x, halfTexel.y,
+		1, 1, 0, 1, 1 - halfTexel.x, 1 - halfTexel.y,
+	};
+
+	glGenVertexArrays(1, &m_glInfo[0].m_VAO);
+	glBindVertexArray(m_glInfo[0].m_VAO);
+
+	glGenBuffers(1, &m_glInfo[0].m_VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_glInfo[0].m_VBO);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 6, vertexData, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0); //Position
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+
+	glEnableVertexAttribArray(1); //UVs
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 6, ((char*)0) + 16);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+unsigned int Model::GetVAO()
+{
+	return m_glInfo[0].m_VAO;
+}

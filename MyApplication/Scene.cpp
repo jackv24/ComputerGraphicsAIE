@@ -10,7 +10,7 @@ Scene::~Scene()
 {
 }
 
-void Scene::Draw(float windowWidth, float windowHeight, float time)
+void Scene::Draw(float windowWidth, float windowHeight)
 {
 	glm::mat4 cameraMatrix = camera.GetCameraMatrix();
 
@@ -18,6 +18,6 @@ void Scene::Draw(float windowWidth, float windowHeight, float time)
 
 	for (unsigned int i = 0; i < m_instances.size(); ++i)
 	{
-		m_instances[i]->Draw(this, time);
+		m_instances[i]->Draw(this, m_time);
 	}
 }

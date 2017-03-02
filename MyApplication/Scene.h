@@ -10,12 +10,14 @@ public:
 	Scene();
 	~Scene();
 
-	void Draw(float windowWidth, float windowHeight, float time);
+	void Draw(float windowWidth, float windowHeight);
 
 	std::vector<Instance*> m_instances;
 
 	Camera camera;
 
 	glm::vec3 m_lightDir;
+
+	float m_time = 0;
 };
 

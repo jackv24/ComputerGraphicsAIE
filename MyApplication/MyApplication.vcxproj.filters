@@ -48,6 +48,9 @@
     <ClInclude Include="Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Framebuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -80,6 +83,9 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Framebuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\shaders\BasicShader.frag">
@@ -98,6 +104,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\bin\shaders\AnimatedLitShader.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\bin\shaders\PostProcessBase.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\bin\shaders\PostProcessBase.vert">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

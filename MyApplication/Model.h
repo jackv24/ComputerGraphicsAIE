@@ -23,6 +23,9 @@ public:
 
 	bool isAnimated();
 
+	void MakePostProcessQuad(int width, int height);
+	unsigned int GetVAO();
+
 	Texture m_diffuse;
 	Texture m_normal;
 	Texture m_specular;

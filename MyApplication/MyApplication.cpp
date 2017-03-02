@@ -10,6 +10,7 @@
 #include "Instance.h"
 #include "Scene.h"
 #include <imgui.h>
+#include "Framebuffer.h"
 
 using glm::vec3;
 using glm::vec4;
@@ -34,6 +35,10 @@ Texture* testDiffuse;
 Texture* testNormal;
 Texture* testSpecular;
 
+Framebuffer* frameBuffer;
+Model* quadModel;
+unsigned int m_postProcessShaderID;
+
 MyApplication::MyApplication()
 {
 }
@@ -46,6 +51,9 @@ MyApplication::~MyApplication()
 	delete testDiffuse;
 	delete testNormal;
 	delete testSpecular;
+
+	delete frameBuffer;
+	delete quadModel;
 }
 
 bool MyApplication::startup()
@@ -55,6 +63,16 @@ bool MyApplication::startup()
 
 	//Initialise gizmo primitive counts
 	Gizmos::create(10000, 10000, 10000, 10000);
+
+	//Setup frame buffer
+	frameBuffer = new Framebuffer(getWindowWidth(), getWindowHeight());
+	frameBuffer->SetUp();
+
+	//Setup quad for rendering framebuffer to screen
+	quadModel = new Model();
+	quadModel->MakePostProcessQuad(getWindowWidth(), getWindowHeight());
+	frameBuffer->m_model = quadModel;
+	m_postProcessShaderID = Shader::CompileShaders("shaders/PostProcessBase.vert", "shaders/PostProcessBase.frag");
 
 	//Load and compile shaders from file
 	m_staticShaderID = Shader::CompileShaders("shaders/LitShader.vert", "shaders/LitShader.frag");
@@ -113,6 +131,9 @@ void MyApplication::update(float deltaTime)
 {
 	m_time += deltaTime;
 
+	//Update scene time
+	scene.m_time = m_time;
+
 	//Update camera
 	scene.camera.Update(getWindowWidth(), getWindowHeight(), deltaTime);
 
@@ -151,6 +172,8 @@ void MyApplication::draw()
 	//Draw gizmos with virtual camera
 	Gizmos::draw(scene.camera.GetCameraMatrix());
 
-	//Draw instances
-	scene.Draw(screenWidth, screenHeight, time);
+	//Draw framebuffer
+	frameBuffer->RenderScene(scene);
+	//Draw scene
+	frameBuffer->Draw(m_postProcessShaderID);
 }
