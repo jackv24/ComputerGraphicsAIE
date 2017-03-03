@@ -90,5 +90,6 @@ void Framebuffer::Draw(unsigned int shaderID)
 	glUniform1i(loc, 0);
 
 	glBindVertexArray(m_model->GetVAO());
+	
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }

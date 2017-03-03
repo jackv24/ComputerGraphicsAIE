@@ -43,6 +43,8 @@ unsigned int m_postProcessDistortID;
 unsigned int m_postProcessSobelID;
 unsigned int m_usingPostProcessID;
 
+int oldWidth, oldHeight;
+
 MyApplication::MyApplication()
 {
 }
@@ -67,6 +69,9 @@ bool MyApplication::startup()
 
 	//Initialise gizmo primitive counts
 	Gizmos::create(10000, 10000, 10000, 10000);
+
+	oldWidth = getWindowWidth();
+	oldHeight = getWindowHeight();
 
 	//Setup frame buffer
 	frameBuffer = new Framebuffer(getWindowWidth(), getWindowHeight());
@@ -187,6 +192,24 @@ void MyApplication::draw()
 	float screenWidth = getWindowWidth();
 	float screenHeight = getWindowHeight();
 	float time = getTime();
+
+	//If screen dimensions have changed
+	if (screenWidth != oldWidth || screenHeight != oldHeight)
+	{
+		std::cout << "Screen resolution changed from " << oldWidth << "x" << oldHeight << " to " << screenWidth << "x" << screenHeight << std::endl;
+
+		//Delete old framebuffer
+		delete frameBuffer;
+		
+		//Create new framebuffer at new resolution, and set up
+		frameBuffer = new Framebuffer(screenWidth, screenHeight);
+		frameBuffer->m_model = quadModel;
+		frameBuffer->SetUp();
+
+		//Keep track of screen reolution changes
+		oldWidth = screenWidth;
+		oldHeight = screenHeight;
+	}
 
 	//Draw gizmos with virtual camera
 	Gizmos::draw(scene.camera.GetCameraMatrix());

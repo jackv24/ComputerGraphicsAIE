@@ -43,5 +43,9 @@ vec4 Sobel()
 
 void main() 
 {
-    fragColor = Sobel();
+	vec4 sobel = Sobel();
+	float intensity = (sobel.x + sobel.y + sobel.z) / 3;
+	vec4 edge = vec4(1-intensity, 1-intensity, 1-intensity, 1);
+
+    fragColor = edge * texture(target, fTexCoord);
 }
