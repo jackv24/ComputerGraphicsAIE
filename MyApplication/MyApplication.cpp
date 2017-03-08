@@ -11,6 +11,7 @@
 #include "Scene.h"
 #include <imgui.h>
 #include "Framebuffer.h"
+#include "StatVariables.h"
 
 using glm::vec3;
 using glm::vec4;
@@ -44,6 +45,9 @@ unsigned int m_postProcessSobelID;
 unsigned int m_usingPostProcessID;
 
 int oldWidth, oldHeight;
+
+int instanceCount = 0;
+int drawCount = 0;
 
 MyApplication::MyApplication()
 {
@@ -204,7 +208,6 @@ void MyApplication::draw()
 		//Create new framebuffer at new resolution, and set up
 		frameBuffer = new Framebuffer(screenWidth, screenHeight);
 		frameBuffer->m_model = quadModel;
-		frameBuffer->SetUp();
 
 		//Keep track of screen reolution changes
 		oldWidth = screenWidth;
@@ -218,4 +221,12 @@ void MyApplication::draw()
 	frameBuffer->RenderScene(scene);
 	//Draw scene
 	frameBuffer->Draw(m_usingPostProcessID);
+
+	ImGui::Begin("Stats");
+	ImGui::Text((std::string("Instances: ") + std::to_string(instanceCount)).c_str());
+	ImGui::Text((std::string("Draw Calls: ") + std::to_string(drawCount)).c_str());
+	ImGui::End();
+
+	instanceCount = 0;
+	drawCount = 0;
 }

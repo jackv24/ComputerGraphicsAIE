@@ -1,5 +1,6 @@
 #include "Model.h"
 #include <gl_core_4_4.h>
+#include "StatVariables.h"
 
 Model::Model()
 {
@@ -73,6 +74,14 @@ bool Model::LoadTexture(const char* fileName, int map)
 void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int programID, Texture* diffuse, Texture* normal, Texture* specular)
 {
 	glm::mat4 mvp = cameraMatrix * transform;
+
+	glm::vec3 screenPos(mvp[3][0] / mvp[3][3], mvp[3][1] / mvp[3][3], mvp[3][2] / mvp[3][3]);
+
+	//Don't draw if off screen
+	if (screenPos.x < -1 || screenPos.x > 1 || screenPos.y < -1 || screenPos.y > 1 || screenPos.z < -1 || screenPos.z > 1)
+		return;
+
+	drawCount++;
 
 	//Pass MVP matrix into shader program
 	unsigned int projectionViewUniform = glGetUniformLocation(programID, "MVP");

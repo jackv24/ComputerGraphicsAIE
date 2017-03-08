@@ -1,6 +1,7 @@
 #include "Instance.h"
 #include <gl_core_4_4.h>
 #include "Scene.h"
+#include "StatVariables.h"
 
 Instance::Instance(Model* model, unsigned int shaderID, Texture* diffuse, Texture* normal, Texture* specular)
 {
@@ -50,6 +51,8 @@ void Instance::UpdateTransform()
 
 void Instance::Draw(Scene* scene, float time)
 {
+	instanceCount++;
+
 	glm::vec3 cameraPos = scene->camera.GetPos();
 	glm::vec3 lightDir = glm::normalize(scene->m_lightDir);
 
