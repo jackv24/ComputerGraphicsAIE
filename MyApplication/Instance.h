@@ -19,8 +19,13 @@ public:
 	void SetRotation(glm::vec3 eulerAngles);
 	void SetScale(glm::vec3 scale);
 
+	glm::mat4 GetTransform();
+	glm::vec3 GetPosition();
+
 	void UpdateTransform();
 	void Draw(Scene* scene, float time);
+
+	Model* m_model;
 
 private:
 	glm::vec3 m_position;
@@ -28,8 +33,6 @@ private:
 	glm::vec3 m_scale;
 
 	glm::mat4 m_transform;
-
-	Model* m_model;
 
 	Texture* m_diffuse;
 	Texture* m_normal;

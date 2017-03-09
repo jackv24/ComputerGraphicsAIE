@@ -205,7 +205,7 @@ void Gizmos::addAABB(const glm::vec3& center,
 		vX = (*transform * glm::vec4(vX,0)).xyz();
 		vY = (*transform * glm::vec4(vY,0)).xyz();
 		vZ = (*transform * glm::vec4(vZ,0)).xyz();
-		c = (*transform)[3].xyz() + c;
+		c = (*transform * glm::vec4(c, 1)).xyz();
 	}
 
 	// top verts

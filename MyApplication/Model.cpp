@@ -1,6 +1,7 @@
 #include "Model.h"
 #include <gl_core_4_4.h>
 #include "StatVariables.h"
+#include <algorithm>
 
 Model::Model()
 {
@@ -36,6 +37,7 @@ bool Model::Load(const char* fileName)
 		std::string err;
 		tinyobj::LoadObj(&attrib, &shapes, &materials, &err, fileName);
 		CreateBuffersOBJ();
+		CalculateBoundsOBJ();
 		return true;
 	}
 
@@ -75,12 +77,7 @@ void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int progr
 {
 	glm::mat4 mvp = cameraMatrix * transform;
 
-	glm::vec3 screenPos(mvp[3][0] / mvp[3][3], mvp[3][1] / mvp[3][3], mvp[3][2] / mvp[3][3]);
-
-	//Don't draw if off screen
-	if (screenPos.x < -1 || screenPos.x > 1 || screenPos.y < -1 || screenPos.y > 1 || screenPos.z < -1 || screenPos.z > 1)
-		return;
-
+	//Keep track of how many models are actually drawn
 	drawCount++;
 
 	//Pass MVP matrix into shader program
@@ -279,6 +276,26 @@ void Model::CreateBuffersFBX()
 		m_glInfo[i].m_IBO = glData[2];
 		m_glInfo[i].m_index_count = mesh->m_indices.size();
 	}
+}
+
+void Model::CalculateBoundsOBJ()
+{
+	for (unsigned int i = 0; i < attrib.vertices.size(); i += 3)
+	{
+		m_minBounds.x = std::min(m_minBounds.x, attrib.vertices[i]);
+		m_minBounds.y = std::min(m_minBounds.y, attrib.vertices[i + 1]);
+		m_minBounds.z = std::min(m_minBounds.z, attrib.vertices[i + 2]);
+
+		m_maxBounds.x = std::max(m_maxBounds.x, attrib.vertices[i]);
+		m_maxBounds.y = std::max(m_maxBounds.y, attrib.vertices[i + 1]);
+		m_maxBounds.z = std::max(m_maxBounds.z, attrib.vertices[i + 2]);
+	}
+}
+
+void Model::SetBounds(glm::vec3 min, glm::vec3 max)
+{
+	m_minBounds = min;
+	m_maxBounds = max;
 }
 
 bool Model::isAnimated()

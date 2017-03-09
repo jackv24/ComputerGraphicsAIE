@@ -15,7 +15,7 @@ Camera::~Camera()
 {
 }
 
-void Camera::Update(float width, float height, float deltaTime)
+void Camera::Update(unsigned int width, unsigned int height, float deltaTime)
 {
 	m_width = width;
 	m_height = height;

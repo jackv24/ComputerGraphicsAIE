@@ -9,7 +9,7 @@ public:
 	Camera() : theta(0), phi(-20), position(-10, 4, 0) {}
 	~Camera();
 
-	void Update(float width, float height, float deltaTime);
+	void Update(unsigned int width, unsigned int height, float deltaTime);
 
 	glm::mat4 GetProjectionMatrix();
 	glm::mat4 GetViewMatrix();

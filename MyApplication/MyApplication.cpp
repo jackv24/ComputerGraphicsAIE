@@ -46,8 +46,11 @@ unsigned int m_usingPostProcessID;
 
 int oldWidth, oldHeight;
 
+bool drawBoundingBoxes = false;
+
 int instanceCount = 0;
 int drawCount = 0;
+int fpsCount = 0;
 
 MyApplication::MyApplication()
 {
@@ -115,6 +118,7 @@ bool MyApplication::startup()
 	animatedModel->LoadTexture("models/Pyro/Pyro_D.tga", 0);
 	animatedModel->LoadTexture("models/Pyro/Pyro_N.tga", 1);
 	animatedModel->LoadTexture("models/Pyro/Pyro_S.tga", 2);
+	animatedModel->SetBounds(vec3(-3, 0, -3)/0.005f, vec3(3, 10, 10)/0.005f);
 
 	//Create instances
 	Instance* inst;
@@ -133,7 +137,7 @@ bool MyApplication::startup()
 
 	inst = new Instance(animatedModel, m_animatedShaderID, nullptr, nullptr, nullptr);
 	inst->SetPosition(vec3(-5, 0, 0));
-	inst->SetScale(vec3(0.005));
+	inst->SetScale(vec3(0.005f));
 	scene.m_instances.push_back(inst);
 
 	return true;
@@ -147,6 +151,7 @@ void MyApplication::shutdown()
 void MyApplication::update(float deltaTime)
 {
 	m_time += deltaTime;
+	fpsCount = m_fps;
 
 	//Update scene time
 	scene.m_time = m_time;
@@ -169,6 +174,19 @@ void MyApplication::update(float deltaTime)
 			vec3(-10, 0, -10 + i),
 			i == 10 ? white : black);
 	}
+
+	if (drawBoundingBoxes)
+	{
+		for (unsigned int i = 0; i < scene.m_instances.size(); ++i)
+		{
+			Model* model = scene.m_instances[i]->m_model;
+
+			vec3 pos = vec3((model->m_minBounds + model->m_maxBounds)*0.5f);
+
+			Gizmos::addAABB(pos, (model->m_maxBounds - model->m_minBounds)*0.5f, glm::vec4(1, 1, 1, 1),
+				&scene.m_instances[i]->GetTransform());
+		}
+	}
 }
 
 void MyApplication::draw()
@@ -182,19 +200,19 @@ void MyApplication::draw()
 	ImGui::End();
 
 	ImGui::Begin("Post Processing");
-	if (ImGui::Button("None"))
+	if (ImGui::Button(m_usingPostProcessID == m_postProcessBaseID ? "None (Selected)" : "None"))
 		m_usingPostProcessID = m_postProcessBaseID;
-	if (ImGui::Button("Box Blur"))
+	if (ImGui::Button(m_usingPostProcessID == m_postProcessBoxBlurID ? "Box Blur (Selected)" : "Box Blur"))
 		m_usingPostProcessID = m_postProcessBoxBlurID;
-	if (ImGui::Button("Distort"))
+	if (ImGui::Button(m_usingPostProcessID == m_postProcessDistortID ? "Distort (Selected)" : "Distort"))
 		m_usingPostProcessID = m_postProcessDistortID;
-	if (ImGui::Button("Sobel"))
+	if (ImGui::Button(m_usingPostProcessID == m_postProcessSobelID ? "Sobel (Selected)" : "Sobel"))
 		m_usingPostProcessID = m_postProcessSobelID;
 	ImGui::End();
 
 	//Draw scene stuff and gizmos
-	float screenWidth = getWindowWidth();
-	float screenHeight = getWindowHeight();
+	unsigned int screenWidth = getWindowWidth();
+	unsigned int screenHeight = getWindowHeight();
 	float time = getTime();
 
 	//If screen dimensions have changed
@@ -207,6 +225,7 @@ void MyApplication::draw()
 		
 		//Create new framebuffer at new resolution, and set up
 		frameBuffer = new Framebuffer(screenWidth, screenHeight);
+		frameBuffer->SetUp();
 		frameBuffer->m_model = quadModel;
 
 		//Keep track of screen reolution changes
@@ -222,9 +241,11 @@ void MyApplication::draw()
 	//Draw scene
 	frameBuffer->Draw(m_usingPostProcessID);
 
-	ImGui::Begin("Stats");
+	ImGui::Begin("Info");
+	ImGui::Text((std::string("FPS: ") + std::to_string(fpsCount)).c_str());
 	ImGui::Text((std::string("Instances: ") + std::to_string(instanceCount)).c_str());
-	ImGui::Text((std::string("Draw Calls: ") + std::to_string(drawCount)).c_str());
+	ImGui::Text((std::string("Models Drawn: ") + std::to_string(drawCount)).c_str());
+	ImGui::Checkbox("Bounding Boxes", &drawBoundingBoxes);
 	ImGui::End();
 
 	instanceCount = 0;

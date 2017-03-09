@@ -21,6 +21,9 @@ public:
 	void CreateBuffersOBJ();
 	void CreateBuffersFBX();
 
+	void CalculateBoundsOBJ();
+	void SetBounds(glm::vec3 min, glm::vec3 max);
+
 	bool isAnimated();
 
 	void MakePostProcessQuad(int width, int height);
@@ -29,6 +32,8 @@ public:
 	Texture m_diffuse;
 	Texture m_normal;
 	Texture m_specular;
+
+	glm::vec3 m_minBounds, m_maxBounds;
 
 private:
 	tinyobj::attrib_t attrib;
