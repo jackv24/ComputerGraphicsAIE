@@ -10,7 +10,7 @@ public:
 	Scene();
 	~Scene();
 
-	void Draw(float windowWidth, float windowHeight);
+	void Draw(int windowWidth, int windowHeight);
 
 	std::vector<Instance*> m_instances;
 

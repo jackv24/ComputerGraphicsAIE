@@ -1,12 +1,12 @@
 #pragma once
 
-#include <glm\mat4x4.hpp>
-#include <glm\vec3.hpp>
+#include <glm\glm.hpp>
+#include <glm\ext.hpp>
 
 class Camera
 {
 public:
-	Camera() : theta(0), phi(-20), position(-10, 4, 0) {}
+	Camera() : theta(-90), phi(0), position(0, 4, 20) {}
 	~Camera();
 
 	void Update(unsigned int width, unsigned int height, float deltaTime);
@@ -17,6 +17,8 @@ public:
 
 	glm::vec3 GetPos();
 
+	float m_fov = glm::pi<float>() * 0.25f;
+
 private:
 	float theta;
 	float phi;
@@ -25,7 +27,7 @@ private:
 
 	glm::vec3 position;
 
-	float m_width = 0;
-	float m_height = 0;
+	unsigned int m_width = 0;
+	unsigned int m_height = 0;
 };
 

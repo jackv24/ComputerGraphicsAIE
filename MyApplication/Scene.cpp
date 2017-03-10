@@ -10,7 +10,7 @@ Scene::~Scene()
 {
 }
 
-void Scene::Draw(float windowWidth, float windowHeight)
+void Scene::Draw(int windowWidth, int windowHeight)
 {
 	glm::mat4 cameraMatrix = camera.GetCameraMatrix();
 

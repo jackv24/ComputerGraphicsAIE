@@ -200,13 +200,13 @@ void MyApplication::draw()
 	ImGui::End();
 
 	ImGui::Begin("Post Processing");
-	if (ImGui::Button(m_usingPostProcessID == m_postProcessBaseID ? "None (Selected)" : "None"))
+	if (ImGui::Button("None"))
 		m_usingPostProcessID = m_postProcessBaseID;
-	if (ImGui::Button(m_usingPostProcessID == m_postProcessBoxBlurID ? "Box Blur (Selected)" : "Box Blur"))
+	if (ImGui::Button("Box Blur"))
 		m_usingPostProcessID = m_postProcessBoxBlurID;
-	if (ImGui::Button(m_usingPostProcessID == m_postProcessDistortID ? "Distort (Selected)" : "Distort"))
+	if (ImGui::Button("Distort"))
 		m_usingPostProcessID = m_postProcessDistortID;
-	if (ImGui::Button(m_usingPostProcessID == m_postProcessSobelID ? "Sobel (Selected)" : "Sobel"))
+	if (ImGui::Button("Sobel"))
 		m_usingPostProcessID = m_postProcessSobelID;
 	ImGui::End();
 
@@ -245,7 +245,10 @@ void MyApplication::draw()
 	ImGui::Text((std::string("FPS: ") + std::to_string(fpsCount)).c_str());
 	ImGui::Text((std::string("Instances: ") + std::to_string(instanceCount)).c_str());
 	ImGui::Text((std::string("Models Drawn: ") + std::to_string(drawCount)).c_str());
+	ImGui::BeginGroup();
 	ImGui::Checkbox("Bounding Boxes", &drawBoundingBoxes);
+	ImGui::SliderAngle("FOV", &scene.camera.m_fov, 0.0f, 180.0f);
+	ImGui::EndGroup();
 	ImGui::End();
 
 	instanceCount = 0;

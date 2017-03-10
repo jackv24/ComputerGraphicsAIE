@@ -1,6 +1,4 @@
 #include "Camera.h"
-#include <glm\glm.hpp>
-#include <glm\ext.hpp>
 #include <Input.h>
 
 const float deg2Rad = 3.14159f / 180.0f;
@@ -49,8 +47,8 @@ void Camera::Update(unsigned int width, unsigned int height, float deltaTime)
 		position += -forward * deltaTime * moveSpeed;
 
 	//Get current mouse position
-	float mx = input->getMouseX();
-	float my = input->getMouseY();
+	int mx = input->getMouseX();
+	int my = input->getMouseY();
 
 	//If right mouse button is down, increment theta and pi by mouse movement
 	if (input->isMouseButtonDown(aie::INPUT_MOUSE_BUTTON_RIGHT))
@@ -72,7 +70,7 @@ void Camera::Update(unsigned int width, unsigned int height, float deltaTime)
 
 glm::mat4 Camera::GetProjectionMatrix()
 {
-	return glm::perspective(glm::pi<float>() * 0.25f, m_width / m_height, 0.1f, 1000.0f);
+	return glm::perspective(m_fov, (float)m_width / m_height, 0.1f, 1000.0f);
 }
 
 glm::mat4 Camera::GetViewMatrix()
