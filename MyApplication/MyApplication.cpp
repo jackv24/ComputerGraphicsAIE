@@ -42,6 +42,7 @@ unsigned int m_postProcessBaseID;
 unsigned int m_postProcessBoxBlurID;
 unsigned int m_postProcessDistortID;
 unsigned int m_postProcessSobelID;
+unsigned int m_postProcessCrosshatchID;
 unsigned int m_usingPostProcessID;
 
 int oldWidth, oldHeight;
@@ -92,6 +93,7 @@ bool MyApplication::startup()
 	m_postProcessBoxBlurID = Shader::CompileShaders("shaders/PostProcessBase.vert", "shaders/PostProcessBoxBlur.frag");
 	m_postProcessDistortID = Shader::CompileShaders("shaders/PostProcessBase.vert", "shaders/PostProcessDistort.frag");
 	m_postProcessSobelID = Shader::CompileShaders("shaders/PostProcessBase.vert", "shaders/PostProcessSobel.frag");
+	m_postProcessCrosshatchID = Shader::CompileShaders("shaders/PostProcessBase.vert", "shaders/PostProcessCrosshatch.frag");
 	m_usingPostProcessID = m_postProcessBaseID;
 
 	//Load and compile shaders from file
@@ -201,13 +203,30 @@ void MyApplication::draw()
 
 	ImGui::Begin("Post Processing");
 	if (ImGui::Button("None"))
+	{
 		m_usingPostProcessID = m_postProcessBaseID;
+		frameBuffer->m_clearColour = vec3(0.25f, 0.25f, 0.25f);
+	}
 	if (ImGui::Button("Box Blur"))
+	{
 		m_usingPostProcessID = m_postProcessBoxBlurID;
+		frameBuffer->m_clearColour = vec3(0.25f, 0.25f, 0.25f);
+	}
 	if (ImGui::Button("Distort"))
+	{
 		m_usingPostProcessID = m_postProcessDistortID;
+		frameBuffer->m_clearColour = vec3(0.25f, 0.25f, 0.25f);
+	}
 	if (ImGui::Button("Sobel"))
+	{
 		m_usingPostProcessID = m_postProcessSobelID;
+		frameBuffer->m_clearColour = vec3(0.25f, 0.25f, 0.25f);
+	}
+	if (ImGui::Button("Crosshatch"))
+	{
+		m_usingPostProcessID = m_postProcessCrosshatchID;
+		frameBuffer->m_clearColour = vec3(1, 1, 1);
+	}
 	ImGui::End();
 
 	//Draw scene stuff and gizmos

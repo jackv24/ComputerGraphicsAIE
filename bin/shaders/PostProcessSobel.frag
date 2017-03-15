@@ -4,16 +4,6 @@ out vec4 fragColor;
 
 uniform sampler2D target;
 
-vec4 SqrVec4(vec4 vec)
-{
-	return vec4(vec.x * vec.x, vec.y * vec.y, vec.z * vec.z, 1);
-}
-
-vec4 SqrtVec4(vec4 vec)
-{
-	return vec4(sqrt(vec.x), sqrt(vec.y), sqrt(vec.z), 1);
-}
-
 vec4 Sobel()
 {
 	vec2 texel = 1.0f / textureSize(target, 0).xy;
@@ -38,7 +28,9 @@ vec4 Sobel()
 	colY += texture(target, fTexCoord + vec2(texel.x, -texel.y)) * 1;
 	colY.a = 1.0f;
 
-	return SqrtVec4(SqrVec4(colX) + SqrVec4(colY));
+	vec4 square = vec4(2, 2, 2, 2);
+
+	return sqrt(pow(colX, square) + pow(colY, square));
 }
 
 void main() 

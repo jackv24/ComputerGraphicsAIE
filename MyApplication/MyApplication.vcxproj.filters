@@ -124,5 +124,8 @@
     <None Include="..\bin\shaders\PostProcessBoxBlur.frag">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\bin\shaders\PostProcessCrosshatch.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

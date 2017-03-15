@@ -192,6 +192,7 @@
     <None Include="..\bin\shaders\PostProcessBase.frag" />
     <None Include="..\bin\shaders\PostProcessBase.vert" />
     <None Include="..\bin\shaders\PostProcessBoxBlur.frag" />
+    <None Include="..\bin\shaders\PostProcessCrosshatch.frag" />
     <None Include="..\bin\shaders\PostProcessDistort.frag" />
     <None Include="..\bin\shaders\PostProcessSobel.frag" />
     <None Include="..\bin\shaders\WaveShader.vert" />

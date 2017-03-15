@@ -21,5 +21,7 @@ public:
 	int m_width, m_height;
 
 	Model* m_model;
+
+	glm::vec3 m_clearColour = glm::vec3(0.25f, 0.25f, 0.25f);
 };
 
